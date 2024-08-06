@@ -156,12 +156,73 @@ $pdo = new PDO('dsn', 'username', 'password', options);
 •username: データベースユーザー名。
 •password: データベースパスワード。
 •options: 配列形式で接続オプションを指定（省略可能）。
-
 2.	例外処理設定:
 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-
 3.	プリペアドステートメント設定:
 PDO::ATTR_EMULATE_PREPARES => false
+
+
+<PDO::ATTR_ERRMODE と PDO::ERRMODE_EXCEPTION の詳細説明>
+
+
+<スローとは>
+「スロー（throw）」は、エラーや例外が発生したことを通知するための動作です。PDO::ERRMODE_EXCEPTIONを設定すると、PDOがエラーに遭遇した際に自動的に例外をスローし、その例外をcatchブロックで処理することができます。この仕組みにより、エラーを適切にハンドリングし、プログラムの安定性を確保することができます。
+
+
+<SQLインジェクション対策>
+$title = $_POST['post_title'];
+$comment = $_POST['post_comment'];
+•説明：フォームから送信されたタイトルとコメントを取得する。
+•例え：ユーザーが「タイトル」と「コメント」を紙に書いてPHPに渡す。
+
+$pdo = new PDO(DB_HOST, DB_USER, DB_PASSWORD, [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_EMULATE_PREPARES => false,
+]);
+•説明：データベースに接続します。PDOを使って接続し、エラーモードとプリペアドステートメントの設定を行います。
+•例え：PHPがデータベースというお店に入って、特別な「安全な接続パス」を用意します。
+
+$sql = ('
+    INSERT INTO
+    board_info (title, comment, contributor_id)
+    VALUES
+    (:TITLE, :COMMENT, :CONTRIBUTOR_ID)
+');
+$stmt = $pdo->prepare($sql);
+•説明：SQLクエリを準備しますが、まだ具体的なデータは入れていません。
+•例え：データベースに「これから入れるデータのための空の箱」を用意します。
+
+$stmt->bindValue(':TITLE', $title, PDO::PARAM_STR);
+$stmt->bindValue(':COMMENT', $comment, PDO::PARAM_STR);
+$stmt->bindValue(':CONTRIBUTOR_ID', $cont_id, PDO::PARAM_STR);
+•説明：プレースホルダーにユーザーが入力したデータをバインドします。
+•例え：箱に「タイトル」と「コメント」を安全に入れていきます。
+
+$stmt->execute();
+•説明：データベースにデータを送信して保存します。
+•例え：箱をデータベースに送って、「タイトル」と「コメント」を安全に保存します。
+
+
+「空の箱」は、最初に用意する「質問の形（SQLクエリ）」を指します。この箱に後から「タイトル」と「コメント」を安全に入れる（バインドする）ことで、最終的にデータベースに送る準備が整います。箱は同じもので、準備してからデータを入れるという二段階のプロセスを表現しています。
+
+・悪い例
+$username = $_POST['username'];
+$password = $_POST['password'];
+説明：フォームからユーザー名とパスワードを取得します。
+例え：ユーザーが「user123」と「pass123」というメモをPHPに渡します。
+
+$sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+説明：ユーザーの入力を直接SQLクエリに埋め込みます。
+例え：ユーザー名とパスワードを直接、データベースに送る準備をします。
+
+$stmt = $pdo->query($sql);
+説明：データベースにクエリを送ります。
+例え：データベースに直接データーを渡す。
+
+まとめ
+説明：ユーザーの入力データが直接SQLクエリに埋め込まれています。
+例え：ユーザー名とパスワードを直接データベースに送るための箱がない状態です。不正なデータがそのまま送られる危険があります。
+
 
 
 

@@ -1,154 +1,175 @@
-body {
-  margin: 0 auto;
-  width: 700px;
-  background-color: rgb(224, 224, 224);
-  }
-  hr {
-  margin: 40px 0;
-  border-color: rgb(137, 137, 137);
-  }
-  h1 {
-  text-align: center;
-  }
-  li {
-  list-style: none;
-  }
-  p {
+/* リセットCSS */
+* {
   margin: 0;
-  }
-  p,
-  span {
-  color: #333;
-  }
-  input,
-  textarea {
-  padding: 10px;
-  border: 1px solid gray;
-  border-radius: 10px;
-  width: 100%;
+  padding: 0;
   box-sizing: border-box;
-  }
-  textarea {
-  line-height: 1.5;
-  }
-  button {
-  display: block;
-  margin-top: 20px;
-  padding: 10px 30px;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f4f4f9;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 80%;
+  margin: auto;
+  overflow: hidden;
+}
+
+header {
+  background: #50b3a2;
   color: #fff;
-  border-radius: 10px;
-  cursor: pointer;
-  }
-  button[name="post_btn"] {
-  border: 1px solid rgb(148, 148, 218);
-  background-color: rgb(94, 94, 255);
-  }
-  button[name="update_btn"],
-  button[name="update_submit_btn"] {
-  border: 1px solid rgb(62, 150, 62);
-  background-color: rgb(74, 152, 74);
-  }
-  button[name="delete_btn"],
-  button[name="delete_submit_btn"] {
-  border: 1px solid rgb(255, 31, 31);
-  background-color: rgb(255, 48, 48);
-  }
-  button[name="cancel_btn"] {
-  border: 1px solid rgb(172, 172, 172);
-  background-color: rgb(182, 182, 182);
-  }
-  button[name="post_btn"]:hover {
-  background-color: rgb(116, 116, 255);
-  }
-  button[name="update_btn"]:hover,
-  button[name="update_submit_btn"]:hover {
-  background-color: rgb(83, 169, 83);
-  }
-  button[name="delete_btn"]:hover,
-  button[name="delete_submit_btn"]:hover {
-  background-color: rgb(255, 82, 82);
-  }
-  button[name="cancel_btn"]:hover {
-  background-color: rgb(189, 189, 189);
-  }
-  .btn--mg-c {
-  margin: 0 auto;
-  }
-  .post-list button {
-  margin: 30px 0 0 0;
-  padding: 8px 20px;
-  }
-  .post-list li {
-  margin-bottom: 15px;
-  padding: 20px 30px;
-  background-color: #fff;
-  border: 1px solid rgb(188, 188, 188);
-  border-radius: 10px;
-  }
-  .post-list span {
-  display: inline-block;
-  margin-bottom: 25px;
-  }
-  .post-form__flex {
-  display: flex;
-  justify-content: center;
-  column-gap: 15px;
-  margin-bottom: 20px;
-  }
-  .post-form__flex>div:first-child {
-  width: 250px;
-  }
-  .post-form__flex>div:last-child {
-  flex: 1;
-  }
-  .btn-flex {
-  display: flex;
-  justify-content: center;
-  column-gap: 15px;
-  }
-  .post-list li:last-child {
-  margin-bottom: 0;
-  }
-  .post-datetime {
-  display: inline-block;
-  margin-top: 25px;
-  font-size: 12px;
-  color: gray;
-  }
-  .post-datetime__updated {
-  display: inline-block;
-  margin-left: 10px;
-  }
-  .updated-post {
-  margin-left: auto;
-  padding: 2px 5px;
-  width: fit-content;
-  font-size: 12px;
-  border: 1px solid rgb(105, 105, 105);
+  padding-top: 30px;
+  min-height: 70px;
+  border-bottom: #e8491d 3px solid;
+}
+
+header a {
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 16px;
+}
+
+header ul {
+  padding: 0;
+  list-style: none;
+}
+
+header li {
+  float: left;
+  display: inline;
+  padding: 0 20px 0 20px;
+}
+
+header #branding {
+  float: left;
+}
+
+header #branding h1 {
+  margin: 0;
+}
+
+header nav {
+  float: right;
+  margin-top: 10px;
+}
+
+header .highlight,
+header .current a {
+  color: #e8491d;
+  font-weight: bold;
+}
+
+header a:hover {
+  color: #cccccc;
+  font-weight: bold;
+}
+
+h1 {
+  text-align: center;
+  margin: 20px 0;
+  color: #333;
+}
+
+.post-form,
+.post-list {
+  background: #fff;
+  padding: 20px;
+  margin: 20px 0;
   border-radius: 5px;
-  color: rgb(105, 105, 105);
-  }
-  .no-post-msg {
-  text-align: center;
-  }
-  .delete-confirm-msg {
-  text-align: center;
-  margin-bottom: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.post-form__flex,
+.btn-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-form__flex label,
+.btn-flex button {
+  margin-bottom: 10px;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 20px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background: #50b3a2;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e8491d;
+}
+
+.err {
   color: red;
   font-weight: bold;
-  }
-  .delete-success-msg {
+}
+
+.post-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.post-list li {
+  background: #fff;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.post-list .post-datetime,
+.post-list .post-datetime__updated {
+  display: block;
+  color: #999;
+  margin-top: 10px;
+}
+
+.no-post-msg {
   text-align: center;
-  }
-  .err {
-  color: red;
-  font-size: 13px;
-  }
-  /* 
-  改行もそのまま表示するための指定
-  これが無いと改行が半角スペースに変換されて
-  表示されてしまう
-  */
-  .p-pre {
+  font-size: 1.2em;
+  color: #999;
+}
+
+.delete-confirm-msg,
+.delete-success-msg {
+  text-align: center;
+  font-size: 1.2em;
+  margin: 20px 0;
+  color: #333;
+}
+
+.p-pre {
   white-space: pre-wrap;
-  }
+  word-wrap: break-word;
+}
+
+footer {
+  background: #333;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+footer p {
+  margin: 0;
+}
