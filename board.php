@@ -74,6 +74,18 @@ $cont_id = $board->getContributorId();
                         <?php if ($post_item['created_at'] < $post_item['updated_at']) : ?>
                             <span class="post-datetime post-datetime__updated">更新日時：<?php echo htmlspecialchars($post_item['updated_at'], ENT_QUOTES, 'UTF-8'); ?></span>
                         <?php endif; ?>
+                        <?php if ($post_item['contributor_id'] === $cont_id) : ?>
+                            <div class="btn-flex">
+                                <form action="update-edit.php" method="post">
+                                    <button type="submit" name="update_btn">編集</button>
+                                    <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post_item['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                </form>
+                                <form action="delete-confirm.php" method="post">
+                                    <button type="submit" name="delete_btn">削除</button>
+                                    <input type="hidden" name="post_id" value="<?php echo htmlspecialchars($post_item['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                </form>
+                            </div>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

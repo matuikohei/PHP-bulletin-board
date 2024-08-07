@@ -1,3 +1,5 @@
+<!--  投稿の削除確認機能を提供するクラス -->
+
 <?php
 require_once 'classes/SessionManager.php';
 require_once 'classes/Database.php';
@@ -27,13 +29,14 @@ class DeleteConfirm {
             $_SESSION['id'] = $_POST['post_id'];
             try {
                 $pdo = $this->db->getPdo();
-                $sql = 'SELECT id, title, comment FROM board_info WHERE id = :ID';
+                $sql = 'SELECT id, title, comment, image_path FROM board_info WHERE id = :ID';
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindValue(':ID', $_SESSION['id'], PDO::PARAM_INT);
                 $stmt->execute();
                 $post_info = $stmt->fetch();
                 $_SESSION['title'] = $post_info['title'];
                 $_SESSION['comment'] = $post_info['comment'];
+                $_SESSION['image_path'] = $post_info['image_path'];
             } catch (PDOException $e) {
                 echo '接続失敗' . $e->getMessage();
                 exit();
@@ -48,12 +51,8 @@ class DeleteConfirm {
         unset($_SESSION['board_token']);
 
         try {
-            $pdo = $this->db->getPdo();
-            $sql = 'DELETE FROM board_info WHERE id = :ID';
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(':ID', $_SESSION['id'], PDO::PARAM_INT);
-            $stmt->execute();
-            unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment']);
+            $this->db->deletePost($_SESSION['id']);
+            unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
             header('Location: delete-success.php');
             exit();
         } catch (PDOException $e) {
@@ -63,7 +62,7 @@ class DeleteConfirm {
     }
 
     private function cancelDelete() {
-        unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment']);
+        unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
         header('Location: board.php');
         exit();
     }
@@ -74,3 +73,4 @@ class DeleteConfirm {
         return $token;
     }
 }
+?>

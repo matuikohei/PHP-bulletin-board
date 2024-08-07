@@ -1,3 +1,5 @@
+<!-- 掲示板アプリのメイン機能を提供するクラス。 -->
+
 <?php
 // classes/Board.php
 
@@ -88,6 +90,21 @@ class Board {
     // 追加: 画像エラーメッセージを取得するメソッド
     public function getErrMsgImage() {
         return $this->err_msg_image;
+    }
+
+    // 追加: 投稿を削除するメソッド
+    public function deletePost($post_id) {
+        $this->db->deletePost($post_id);
+    }
+
+    // 追加: 投稿情報を取得するメソッド
+    public function getPostById($post_id) {
+        return $this->db->getPostById($post_id);
+    }
+
+    // 追加: 投稿を更新するメソッド
+    public function updatePost($id, $title, $comment, $imagePath) {
+        $this->db->updatePost($id, $title, $comment, $imagePath);
     }
 }
 ?>

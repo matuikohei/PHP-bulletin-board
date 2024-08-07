@@ -1,3 +1,5 @@
+<!-- 削除完了後のリダイレクト処理を行うクラス -->
+
 <?php
 require_once 'classes/SessionManager.php';
 
@@ -13,3 +15,4 @@ class DeleteSuccess {
         header('refresh: 3; url=board.php');
     }
 }
+?>
