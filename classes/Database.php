@@ -38,10 +38,72 @@ class Database {
         $stmt->execute();
     }
 
+    /**
+    * 投稿データをデータベースから全て取得し、降順で返すメソッド。
+    *
+    * このメソッドは、board_info テーブルから全ての投稿データを取得し、
+    * IDの降順で並べた状態で結果を返します。
+    *
+    * @return array 投稿データの配列
+    */
     public function fetchAllPosts() {
         $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+    * 検索キーワードに基づいて投稿を取得するメソッド。
+    *
+    * @param string $keyword 検索キーワード。
+    * @param int $page 現在のページ番号。
+    * @param int $limit 1ページあたりの表示件数。
+    * @return array 投稿データの配列を返す。
+    */
+    public function searchPosts($keyword, $page, $limit) {
+        $offset = ($page - 1) * $limit;
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM board_info
+             WHERE title LIKE :keyword1 OR comment LIKE :keyword2
+             ORDER BY id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':keyword1', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+    * 検索結果の投稿数を取得するメソッド。
+    *
+    * @param string $keyword 検索キーワード。
+    * @return int 検索結果の投稿数を返す。
+    */
+    public function countSearchResults($keyword) {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM board_info WHERE title LIKE :keyword1 OR comment LIKE :keyword2');
+        $stmt->bindValue(':keyword1', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    // 指定されたページ番号に基づいて投稿を取得するメソッド
+    public function fetchPostsByPage($page, $limit) {
+        $offset = ($page - 1) * $limit;
+        $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // 投稿の総数を取得するメソッド
+    public function countAllPosts() {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM board_info');
+        return $stmt->fetchColumn();
     }
 
     // 画像のパスを取得するメソッド

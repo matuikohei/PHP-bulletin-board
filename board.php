@@ -12,12 +12,31 @@ if (!$sessionManager->isLoggedIn()) {
     exit();
 }
 
+// 現在のページ番号を取得
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 10; // 1ページあたりの表示件数
+
+// 検索キーワードを取得
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+
 // 掲示板のメイン処理を開始
 $board = new Board();
-$board->handlePostRequest(); // ユーザーの投稿リクエストを処理
-$post_list = $board->getPosts(); // 投稿一覧を取得
+$board->handlePostRequest(); // ユーザーの投稿リクエストを処理m、
+// 検索キーワードがある場合の処理と通常の投稿取得処理
+if (!empty($keyword)) {
+    // 検索キーワードがある場合の処理
+    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
+    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
+} else {
+    // 通常の投稿取得処理
+    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
+    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
+}
 $token = $board->generateToken(); // CSRFトークンを生成
 $user_id = $_SESSION['user_id']; // ログインしたユーザーのIDを取得
+
+// 総投稿数を取得し、総ページ数を計算
+$total_pages = ceil($total_posts / $limit);
 ?>
 
 <!DOCTYPE html>
@@ -30,8 +49,18 @@ $user_id = $_SESSION['user_id']; // ログインしたユーザーのIDを取得
 </head>
 <body>
     <h1>掲示板アプリ</h1>
+
     <!-- ログアウトリンク -->
     <a href="logout.php">ログアウト</a>
+
+    <!-- 検索フォーム -->
+    <form action="board.php" method="get">
+        <input type="text" name="keyword" placeholder="検索キーワードを入力">
+        <button type="submit">検索</button>
+        <?php if (!empty($keyword)): ?>
+            <a href="board.php">全て表示</a>
+        <?php endif; ?>
+    </form>
 
     <!-- 投稿フォーム -->
     <section class="post-form">
@@ -74,7 +103,6 @@ $user_id = $_SESSION['user_id']; // ログインしたユーザーのIDを取得
         </form>
     </section>
 
-    <hr>
     <!-- 投稿リストの表示 -->
     <section class="post-list">
         <?php if (count($post_list) === 0) : ?>
@@ -115,5 +143,24 @@ $user_id = $_SESSION['user_id']; // ログインしたユーザーのIDを取得
             </ul>
         <?php endif; ?>
     </section>
+
+    <!-- ページネーション -->
+    <!-- ページネーション -->
+<section class="pagination">
+    <?php if (!empty($keyword)): ?>
+        <a href="board.php">全て表示</a>
+    <?php endif; ?>
+    <?php if ($page > 1): ?>
+        <a href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">&laquo; 前のページ</a>
+    <?php endif; ?>
+    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+        <a href="?page=<?php echo $i; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" <?php if ($i == $page) echo 'class="current-page"'; ?>>
+            <?php echo $i; ?>
+        </a>
+    <?php endfor; ?>
+    <?php if ($page < $total_pages): ?>
+        <a href="?page=<?php echo $page + 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">次のページ &raquo;</a>
+    <?php endif; ?>
+</section>
 </body>
 </html>

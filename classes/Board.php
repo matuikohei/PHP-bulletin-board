@@ -86,12 +86,45 @@ class Board {
     }
 
     /**
-     * 全ての投稿を取得するメソッド。
+     * 指定されたページの投稿を取得するメソッド
      *
-     * @return array 投稿データの配列を返す。
+     * @param int $page 現在のページ番号
+     * @param int $limit 1ページあたりの表示件数
+     * @return array 投稿データの配列を返す
      */
-    public function getPosts() {
-        return $this->db->fetchAllPosts();
+    public function getPosts($page = 1, $limit = 10) {
+        return $this->db->fetchPostsByPage($page, $limit);
+    }
+
+    /**
+     * 投稿の総数を取得するメソッド
+     *
+     * @return int 投稿の総数を返す
+     */
+    public function getTotalPostCount() {
+        return $this->db->countAllPosts();
+    }
+
+    /**
+     * 検索キーワードに基づいて投稿を取得するメソッド
+     *
+     * @param string $keyword 検索キーワード
+     * @param int $page 現在のページ番号
+     * @param int $limit 1ページあたりの表示件数
+     * @return array 検索結果の投稿データの配列を返す
+     */
+    public function searchPosts($keyword, $page = 1, $limit = 10) {
+        return $this->db->searchPosts($keyword, $page, $limit);
+    }
+
+    /**
+     * 検索結果の投稿総数を取得するメソッド
+     *
+     * @param string $keyword 検索キーワード
+     * @return int 検索結果の投稿総数を返す
+     */
+    public function countSearchResults($keyword) {
+        return $this->db->countSearchResults($keyword);
     }
 
     /**
