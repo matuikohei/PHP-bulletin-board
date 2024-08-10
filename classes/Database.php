@@ -28,11 +28,12 @@ class Database {
         return $this->pdo;
     }
 
-    public function insertPost($title, $comment, $contributor_id, $imagePath) {
-        $stmt = $this->pdo->prepare('INSERT INTO board_info (title, comment, contributor_id, image_path) VALUES (:title, :comment, :contributor_id, :image_path)');
+    // user_id を使用して投稿を保存するメソッド
+    public function insertPost($title, $comment, $user_id, $imagePath) {
+        $stmt = $this->pdo->prepare('INSERT INTO board_info (title, comment, user_id, image_path) VALUES (:title, :comment, :user_id, :image_path)');
         $stmt->bindValue(':title', $title, PDO::PARAM_STR);
         $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
-        $stmt->bindValue(':contributor_id', $contributor_id, PDO::PARAM_STR);
+        $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->bindValue(':image_path', $imagePath, PDO::PARAM_STR);
         $stmt->execute();
     }
@@ -79,6 +80,22 @@ class Database {
         $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
         $stmt->bindValue(':image_path', $imagePath, PDO::PARAM_STR);
         $stmt->execute();
+    }
+
+    // 追加: ユーザーをデータベースに保存するメソッド
+    public function insertUser($username, $password) {
+        $stmt = $this->pdo->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
+        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
+        $stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT), PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    // 追加: ユーザー情報を取得するメソッド
+    public function getUserByUsername($username) {
+        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = :username');
+        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
 ?>

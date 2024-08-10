@@ -18,4 +18,3 @@ $deleteSuccess->redirectToBoard();
     <p class="delete-success-msg">3秒後に自動で掲示板TOPへ戻ります。</p>
 </body>
 </html>
-?>
