@@ -17,8 +17,9 @@ class Board {
     public function __construct() {
         // セッション管理クラスとデータベースクラスのインスタンスを作成
         $this->sessionManager = new SessionManager();
-        // セッションを開始
         $this->db = new Database();
+
+        // セッションを開始
         $this->sessionManager->startSession();
 
         // ユーザーがログインしているか確認し、ログインしていない場合はログインページにリダイレクト
