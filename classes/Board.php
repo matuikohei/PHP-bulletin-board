@@ -16,6 +16,7 @@ class Board {
     // コンストラクタ: セッションの初期化とログイン状態の確認を行う。
     public function __construct() {
         // セッション管理クラスとデータベースクラスのインスタンスを作成
+        // インスタンス->プロパティ名とすることで、そのインスタンスのプロパティにアクセスすることができる（プロパティ名に$は不要）
         $this->sessionManager = new SessionManager();
         $this->db = new Database();
 
@@ -57,12 +58,13 @@ class Board {
             $imagePath = $this->handleImageUpload();
 
             // タイトル、コメントが入力されており、画像アップロードに成功していれば投稿をデータベースに保存
+            // DeleteConfig.phpでuser_idを使用するので削除しない
             if ($_SESSION['title'] != '' && $_SESSION['comment'] != '' && $imagePath !== false) {
                 $title = $_SESSION['title'];
                 $comment = $_SESSION['comment'];
                 $userId = $_SESSION['user_id'];  // ログインユーザーIDを取得
                 $this->db->insertPost($title, $comment, $userId, $imagePath);
-                unset($_SESSION['title'], $_SESSION['comment']);
+                unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
             }
         }
     }

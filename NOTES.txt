@@ -228,6 +228,20 @@ $stmt = $pdo->query($sql);
 セッションを使うと異なるスクリプト間でデータが共有される。
 
 
+<プロパティへのアクセス>
+インスタンス->プロパティ名とすることで、そのインスタンスのプロパティにアクセスすることができる（プロパティ名に$は不要）
+
+$this->sessionManager = new SessionManager();
+
+
+<メソッドの使い方>
+メソッドは「public function メソッド名()」のように定義する
+また、「インスタンス->メソッド名()」のようにメソッドにアクセスする（メソッドを呼び出す）ことができる。
+
+
+<命名方法>
+動詞 + 名詞の形式: 多くのプログラミング言語では、メソッドや関数の名前はそのメソッドが何をするかを表すために、動詞 + 名詞の形式がよく使われます。handleは「処理する」という意味の動詞で、PostRequestは「POSTリクエスト」を指します。
+
 
 
 <Board.php フローチャート>
@@ -445,6 +459,7 @@ SessionManagerのgenerateTokenメソッドでトークンが生成される。�
 [終了]
 
 
+
 <SessionManager.php フローチャート>
 [セッション開始を確認 (startSession)]
     |
@@ -554,3 +569,166 @@ SessionManagerのgenerateTokenメソッドでトークンが生成される。�
     |
     v
 [セッションを破棄 (session_destroy)]
+
+
+<DeleteConfirm.php フローチャート>
+[開始]
+    |
+    v
+[DeleteConfirmクラスのインスタンス作成]
+    |
+    v
+[セッションの開始 (startSession())]
+    |
+    v
+[POSTリクエストを処理 (handleRequest())]
+    |
+    v
+[削除ボタンが押されたか？ (isset($_POST['delete_btn']))]
+    |----> [はい] -----> [削除対象の投稿情報を取得 (getPostInfo())]
+    |                          |
+    |                          v
+    |                  [POSTリクエストに投稿IDが含まれているか確認 (isset($_POST['post_id']) && $_POST['post_id'] != '')]
+    |                          |
+    |                          v
+    |                  [投稿IDをセッションに保存 ($_SESSION['id'] = $_POST['post_id'])]
+    |                          |
+    |                          v
+    |                  [データベース接続を取得 ($pdo = $this->db->getPdo())]
+    |                          |
+    |                          v
+    |                  [投稿情報をデータベースから取得 (SELECT id, title, comment, image_path)]
+    |                          |
+    |                          v
+    |                  [投稿情報をセッションに保存 ($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path'])]
+    |
+    |----> [削除確定ボタンが押されたか？ (isset($_POST['delete_submit_btn']))]
+    |                          |
+    |                          v
+    |                  [CSRFトークンを検証 (validateToken())]
+    |                          |
+    |                          v
+    |                  [トークンが無効なら "不正な投稿です" を表示]
+    |                          |
+    |                          v
+    |                  [投稿をデータベースから削除 ($this->db->deletePost($_SESSION['id']))]
+    |                          |
+    |                          v
+    |                  [セッションから投稿情報を削除 (unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']))]
+    |                          |
+    |                          v
+    |                  [削除成功ページにリダイレクト (header('Location: delete-success.php'))]
+    |
+    |----> [キャンセルボタンが押されたか？ (isset($_POST['cancel_btn']))]
+                               |
+                               v
+                       [セッションから投稿情報を削除 (unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']))]
+                               |
+                               v
+                       [掲示板ページにリダイレクト (header('Location: board.php'))]
+    |
+    v
+[終了]
+
+
+<DeleteSuccess.php フローチャート>
+開始
+    |
+    v
+[SessionManagerインスタンス作成]
+    |
+    v
+[セッション開始 (startSession())]
+    |
+    v
+[掲示板ページへのリダイレクト (3秒後)]
+    |
+    v
+終了
+
+<UpdateEdit.php フローチャート>
+[開始]
+    |
+    v
+[セッション開始 (startSession())]
+    |
+    v
+[POSTリクエストの処理 (handleRequest())]
+    |
+    +-------------------------------+
+    |                               |
+    v                               v
+[更新ボタンが押されたか確認]   [キャンセルボタンが押されたか確認]
+    |                               |
+    |                               v
+    |                     [更新処理をキャンセル (cancelUpdate())]
+    |                               |
+    v                               |
+[投稿情報取得 (getPostInfo())]       |
+    |                               |
+    v                               |
+[投稿情報をセッションに保存]          |
+    |                               |
+    v                               |
+[更新処理 (updatePost())]            |
+    |                               |
+    +--> [トークンの検証 (validateToken())]
+    |                               |
+    +--> [入力の検証 (validateInputs())]
+    |                               |
+    +--> [エラーがないか確認 (isValid())]
+    |                               |
+    +--> [投稿内容を更新 (executeUpdate())]
+    |                               |
+    v                               |
+[掲示板ページにリダイレクト (board.php)] <------------------+
+    |
+    v
+[終了]
+
+
+<User.php>
+[Userクラスのインスタンス作成]
+    |
+    v
+[Databaseクラスのインスタンス生成]
+    |
+    v
+[SessionManagerクラスのインスタンス生成]
+    |
+    v
+[セッションを開始 (startSession())]
+    |
+    v
+[リクエストに基づいて処理を選択]
+    |
+    +---------------------------+
+    |                           |
+    v                           v
+[ログイン処理 (login())]       [ログアウト処理 (logout())]
+    |                           |
+    v                           v
+[ユーザー名でDBから情報取得]    [セッションを破棄してログアウト]
+    |                           |
+    v                           v
+[パスワードが一致するか確認]   [リダイレクトなどの処理]
+    |                           |
+    +---------> [一致]          |
+    |             |             |
+    |             v             |
+    |     [セッションにuser_id保存]
+    |             |
+    |             v
+    +-> [ログイン成功 -> trueを返す]
+    |
+    +-> [ログイン失敗 -> falseを返す]
+
+    |
+    v
+[新規ユーザー登録 (register())]
+    |
+    v
+[パスワードをハッシュ化]
+    |
+    v
+[ユーザー名とハッシュ化パスワードをDBに保存]
