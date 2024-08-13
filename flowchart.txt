@@ -1,0 +1,608 @@
+<Board.php フローチャート>
+[開始]
+    |
+    v
+[Boardクラスのインスタンス作成]
+board.phpでインスタンスを作成する
+    |
+    v
+[__construct()メソッド呼び出し]
+board.phpでインスタンスが生成されると自動でconstructが呼び出される
+    |
+    v
+[SessionManagerインスタンス作成] ---> [セッション開始 (startSession())]
+セッションは、サーバー側でユーザーごとのデータを一時的に保持するため箱
+    |
+    v
+[Databaseインスタンス作成]
+    |
+    v
+[ログイン状態を確認 isLoggedIn()メソッドの呼び出し]
+isLoggedInメソッドは、SessionManager.phpにある
+    |
+    v
+[ログイン済みか？] --------> [未ログイン] -------> [ログインページにリダイレクト] ---> [終了]
+if (!$this->sessionManager->isLoggedIn()) は、isLoggedIn メソッドを使ってユーザーがログインしているかどうかを確認。! は否定演算子で、isLoggedIn() が false を返す（ログインしていない）場合に if 文の内部が実行。
+header('Location: login.php'); は、ユーザーがログインしていない場合に、ブラウザを login.php ページにリダイレクトする。
+exit(); は、スクリプトの実行をここで終了させる。これにより、未ログインのユーザーが続行することを防ぐ。
+    |
+    v
+[ログイン済み]
+    |
+    v
+[handlePostRequest()メソッド呼び出し]
+    |
+    v
+[POSTリクエストか？（投稿ボタンが押されたか）] --------> [POSTリクエストでない] ---> [終了]
+    |
+    v
+[POSTリクエスト]
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+$_SERVERという箱の中に入っている、['REQUEST_METHOD']という情報が、POSTであるか確認している。
+    |
+    v
+[CSRFトークンを検証 (validateToken())]
+どのタイミングでトークンが生成されるのか？
+board.phpのページに訪れた瞬間にトークンを生成。SessionManager.phpのgenerateTokenメソッドでトークンが生成される。このトークンをBoard.phpでも使えるのはセッションを使っているので、異なるスクリプト(SessionManager.phpやBoard.phpなどのPHPプログラム)で共有されるため
+
+$_POSTという箱の中に入っている、['board_token']という情報。
+$_POST['board_token'] は、フォーム送信時に送られてきたトークンのこと。SessionManager.phpのvalidateToken メソッド（工場）に、$_POST['board_token']という材料を渡して、そのトークンが正しいかどうかを確認している
+
+SessionManager.phpのvalidateToken メソッドでは、トークンが正しければ、何も返さずに、違った場合のみ処理を中止させる。
+    |
+    v
+[タイトルが入力されているか？]
+    |
+    v
+[タイトルあり] --------> [タイトルなし] ---> [タイトルのエラーメッセージを設定] ---> [終了]
+    |
+    v
+[コメントが入力されているか？]
+    |
+    v
+[コメントあり] --------> [コメントなし] ---> [コメントのエラーメッセージを設定] ---> [終了]
+    |
+    v
+[画像アップロード処理 (handleImageUpload())]
+    |
+    v
+[タイトル、コメント、画像アップロードが成功しているか？]
+    |
+    v
+[成功している] --------> [失敗している] ---> [終了]
+    |
+    v
+[データベースに投稿を保存 (insertPost())]
+if ($_SESSION['title'] != '' && $_SESSION['comment'] != '' && $imagePath !== false) {
+    $title = $_SESSION['title'];
+    $comment = $_SESSION['comment'];
+    $userId = $_SESSION['user_id'];  // ログインユーザーIDを取得
+    $this->db->insertPost($title, $comment, $userId, $imagePath);
+    unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
+}
+Database.phpのinsertPostメソッドを使用し、データーベースに、タイトル、コメント、画像、ユーザーIDを保存
+    |
+    v
+[セッションのタイトルとコメント、イメージを削除]
+保存が完了した後、unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']); でこれらのセッション変数を削除。user_id は後の処理で使用するため、削除しない。
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+[handleImageUpload()メソッド]
+private function handleImageUpload() {
+        // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
+        if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
+            // アップロードされた画像を保存するディレクトリを指定
+            $uploadDir = 'uploads/';
+            // 保存先のファイルパスを生成（ディレクトリ + ファイル名）
+            $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+
+            // アップロードされた画像ファイルを指定したディレクトリに移動
+            if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
+                // 移動に成功した場合、保存先のファイルパスを返す
+                return $uploadFile;
+            } else {
+                // 画像の移動に失敗した場合、エラーメッセージを設定し、falseを返す
+                $this->err_msg_image = '画像のアップロードに失敗しました';
+                return false;
+            }
+        }
+        return '';
+}
+    |
+    v
+[画像がアップロードされたか？]
+if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK)
+$_FILES という箱の中に 'post_image' という名前の情報が入っているかどうかを確認している。
+これは、ユーザーが画像ファイルをアップロードしようとした場合、その情報が $_FILES に保存されるため、アップロードが行われたかどうかをチェックするために使われる。
+
+$_FILES['post_image']['error'] == UPLOAD_ERR_OKについて
+ユーザーがアップロードした画像ファイルに関するさまざまな情報が $_FILES['post_image'] の中に入っている。
+
+この情報の中には、例えば以下のようなものがある。
+'name': ファイルの元の名前
+'type': ファイルのタイプ（例えば “image/jpeg” など）
+'size': ファイルのサイズ（バイト数）
+'tmp_name': サーバーに一時的に保存されたファイルのパス
+'error': アップロード中に発生したエラーコード
+
+'error' とは？
+'error' は、ファイルのアップロード時に問題が発生したかどうかを示す値。具体的には、アップロードの成功・失敗を表すコードが入ってる。
+
+UPLOAD_ERR_OK とは？
+UPLOAD_ERR_OK は、アップロードが成功したことを示す特別な定数（一定の値）。PHP では、アップロードが正常に行われた場合、この 'error' キーには UPLOAD_ERR_OK という値がセットされる。
+
+$_FILES['post_image']の['error']の中にUPLOAD_ERR_OKという情報が入っているかどうかを確認することで、画像が問題なくアップロードされたかを確認している
+
+    |
+    v
+[アップロード成功] --------> [アップロード失敗またはなし] ---> [エラーメッセージを設定しfalseを返す] ---> [終了]
+    |
+    v
+[画像を指定のディレクトリに保存]
+$uploadDir = 'uploads/';
+$uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+    |
+    v
+[画像のパスを返す]
+return $uploadFile
+この行は、「アップロードしたファイルの保存場所」を返す
+$uploadFileという箱に、保存されたファイルのパス（場所）が入っている。
+例えば、“uploads/example.jpg” というパスが返されると、その後の処理でそのファイルの場所を使って、画像を表示したり、データベースに保存したりすることができる。
+
+具体的には、handleImageUpload()メソッドで取得した画像のパスは、Board.phpのhandlePostRequestの＄imagePathという箱の中に保存される。
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getPosts()メソッド]
+//  指定されたページの投稿を取得するメソッド
+public function getPosts($page = 1, $limit = 10) {
+    return $this->db->fetchPostsByPage($page, $limit);
+}
+    |
+    v
+[データベースから指定されたページの投稿を取得 (fetchPostsByPage())]
+getPosts($page, $limit) が呼び出されると、その中で Databese.phpのfetchPostsByPage($page, $limit) が実行
+fetchPostsByPage メソッドは、データベースから指定されたページと表示件数に基づいて投稿データを取得
+    |
+    v
+[取得した投稿を返す]
+返す先は、呼び出し元の、board.phpの$post_listに格納
+$post_list = $board->getPosts($page, $limit);
+$post_list にはデータベースから取得された投稿データが格納され、これが掲示板に表示される投稿リストとして使われる
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getTotalPostCount()メソッド]
+$total_posts = $board->getTotalPostCount();
+board.phpで呼び出される。呼び出されて実行された値は、board.phpの$total_postsに格納される
+    |
+    v
+[データベースから投稿の総数を取得 (countAllPosts())]
+Database.phpのcountAllPostsメソッドを呼び出す。処理の結果としてデータベースの board_info テーブル内の投稿数をカウントし、その数を返します
+    |
+    v
+[取得した投稿の総数を返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[searchPosts()メソッド]
+board.phpで呼び出される。
+// 検索キーワードがある場合の処理と通常の投稿取得処理
+if (!empty($keyword)) {
+    // 検索キーワードがある場合の処理
+    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
+    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
+} else {
+    // 通常の投稿取得処理
+    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
+    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
+}
+    |
+    v
+[データベースから指定されたキーワードで投稿を検索 (searchPosts())]
+    |
+    v
+[取得した検索結果を返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[countSearchResults()メソッド]
+    |
+    v
+[データベースから検索結果の投稿総数を取得 (countSearchResults())]
+    |
+    v
+[取得した検索結果の総数を返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[generateToken()メソッド]
+    |
+    v
+[セッションマネージャーを使ってCSRFトークンを生成 (setToken())]
+    |
+    v
+[生成されたトークンを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgTitle()メソッド]
+    |
+    v
+[タイトルのエラーメッセージを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgComment()メソッド]
+    |
+    v
+[コメントのエラーメッセージを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgImage()メソッド]
+    |
+    v
+[画像のエラーメッセージを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[deletePost()メソッド]
+    |
+    v
+[データベースから指定された投稿を削除 (deletePost())]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getPostById()メソッド]
+    |
+    v
+[データベースから指定されたIDの投稿を取得 (getPostById())]
+    |
+    v
+[取得した投稿データを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[updatePost()メソッド]
+    |
+    v
+[データベースの投稿データを更新 (updatePost())]
+    |
+    v
+[終了]
+
+
+
+
+
+
+
+
+
+
+<SessionManager.php フローチャート>
+[セッション開始を確認 (startSession)]
+    |
+    v
+[セッションが開始されているか確認 (session_status())]
+    |
+    +----> [セッションが開始されていない場合]
+    |         |
+    |         v
+    |    [セッションの設定を変更 (ini_set)]
+    |         |
+    |    [セッションを開始 (session_start)]
+    |         |
+    |    [セッション有効期限の確認 (isSessionExpired)]
+    |         |
+    |         +----> [有効期限が切れている場合]
+    |                    |
+    |               [セッションを破棄 (session_unset, session_destroy)]
+    |                    |
+    |               [新しいセッションを開始 (session_start)]
+    |                    |
+    |               [セッションIDを再生成 (session_regenerate_id)]
+    |
+    v
+[最終アクティビティ時間を更新 ($_SESSION['LAST_ACTIVITY'])]
+    |
+    v
+[終了]
+
+------------------------------------------------------
+
+[セッションの有効期限を確認 (isSessionExpired)]
+    |
+    v
+[最終アクティビティ時間が存在するか確認]
+    |
+    +----> [存在しない場合]
+    |         |
+    |         v
+    |    [有効期限が切れていない (false)]
+    |
+    +----> [存在する場合]
+              |
+         [現在時刻 - 最終アクティビティ時間 > 1800秒か確認]
+              |
+         +----> [有効期限が切れている (true)]
+         |         |
+         |    [有効期限が切れていない (false)]
+         |
+         v
+    [有効期限が切れている場合は true を返す]
+    [有効期限が切れていない場合は false を返す]
+
+------------------------------------------------------
+
+[CSRFトークンを生成 (setToken)]
+    |
+    v
+[ランダムなトークンを生成 (uniqid, sha1)]
+    |
+    v
+[トークンをセッションに保存 ($_SESSION['board_token'])]
+    |
+    v
+[トークンを返す (return $token)]
+
+------------------------------------------------------
+
+[CSRFトークンを検証 (validateToken)]
+    |
+    v
+[セッションにトークンが存在するか確認 ($_SESSION['board_token'])]
+    |
+    +----> [トークンが存在しない、または一致しない場合]
+    |         |
+    |    [不正な投稿として処理を終了 (exit)]
+    |
+    v
+[トークンをセッションから削除 (unset $_SESSION['board_token'])]
+    |
+    v
+[フォームからトークンを削除 (unset $_POST['board_token'])]
+
+------------------------------------------------------
+
+[ユーザーがログインしているか確認 (isLoggedIn)]
+    |
+    v
+[セッションに user_id が存在するか確認 ($_SESSION['user_id'])]
+    |
+    v
+[存在する場合は true、存在しない場合は false を返す] 返した値はBoard.phpのconstruct()で使われる
+
+------------------------------------------------------
+
+[ユーザーをログイン状態に設定 (loginUser)]
+    |
+    v
+[セッションに user_id を保存 ($_SESSION['user_id'] = $user_id)]
+
+------------------------------------------------------
+
+[ログアウト処理 (logoutUser)]
+    |
+    v
+[セッションデータを削除 (session_unset)]
+    |
+    v
+[セッションを破棄 (session_destroy)]
+
+
+<DeleteConfirm.php フローチャート>
+[開始]
+    |
+    v
+[DeleteConfirmクラスのインスタンス作成]
+    |
+    v
+[セッションの開始 (startSession())]
+    |
+    v
+[POSTリクエストを処理 (handleRequest())]
+    |
+    v
+[削除ボタンが押されたか？ (isset($_POST['delete_btn']))]
+    |----> [はい] -----> [削除対象の投稿情報を取得 (getPostInfo())]
+    |                          |
+    |                          v
+    |                  [POSTリクエストに投稿IDが含まれているか確認 (isset($_POST['post_id']) && $_POST['post_id'] != '')]
+    |                          |
+    |                          v
+    |                  [投稿IDをセッションに保存 ($_SESSION['id'] = $_POST['post_id'])]
+    |                          |
+    |                          v
+    |                  [データベース接続を取得 ($pdo = $this->db->getPdo())]
+    |                          |
+    |                          v
+    |                  [投稿情報をデータベースから取得 (SELECT id, title, comment, image_path)]
+    |                          |
+    |                          v
+    |                  [投稿情報をセッションに保存 ($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path'])]
+    |
+    |----> [削除確定ボタンが押されたか？ (isset($_POST['delete_submit_btn']))]
+    |                          |
+    |                          v
+    |                  [CSRFトークンを検証 (validateToken())]
+    |                          |
+    |                          v
+    |                  [トークンが無効なら "不正な投稿です" を表示]
+    |                          |
+    |                          v
+    |                  [投稿をデータベースから削除 ($this->db->deletePost($_SESSION['id']))]
+    |                          |
+    |                          v
+    |                  [セッションから投稿情報を削除 (unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']))]
+    |                          |
+    |                          v
+    |                  [削除成功ページにリダイレクト (header('Location: delete-success.php'))]
+    |
+    |----> [キャンセルボタンが押されたか？ (isset($_POST['cancel_btn']))]
+                               |
+                               v
+                       [セッションから投稿情報を削除 (unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']))]
+                               |
+                               v
+                       [掲示板ページにリダイレクト (header('Location: board.php'))]
+    |
+    v
+[終了]
+
+
+
+
+
+
+
+
+
+
+<DeleteSuccess.php フローチャート>
+開始
+    |
+    v
+[SessionManagerインスタンス作成]
+    |
+    v
+[セッション開始 (startSession())]
+    |
+    v
+[掲示板ページへのリダイレクト (3秒後)]
+    |
+    v
+終了
+
+<UpdateEdit.php フローチャート>
+[開始]
+    |
+    v
+[セッション開始 (startSession())]
+    |
+    v
+[POSTリクエストの処理 (handleRequest())]
+    |
+    +-------------------------------+
+    |                               |
+    v                               v
+[更新ボタンが押されたか確認]   [キャンセルボタンが押されたか確認]
+    |                               |
+    |                               v
+    |                     [更新処理をキャンセル (cancelUpdate())]
+    |                               |
+    v                               |
+[投稿情報取得 (getPostInfo())]       |
+    |                               |
+    v                               |
+[投稿情報をセッションに保存]          |
+    |                               |
+    v                               |
+[更新処理 (updatePost())]            |
+    |                               |
+    +--> [トークンの検証 (validateToken())]
+    |                               |
+    +--> [入力の検証 (validateInputs())]
+    |                               |
+    +--> [エラーがないか確認 (isValid())]
+    |                               |
+    +--> [投稿内容を更新 (executeUpdate())]
+    |                               |
+    v                               |
+[掲示板ページにリダイレクト (board.php)] <------------------+
+    |
+    v
+[終了]
+
+
+
+
+
+
+
+
+
+
+
+<User.php>
+[Userクラスのインスタンス作成]
+    |
+    v
+[Databaseクラスのインスタンス生成]
+    |
+    v
+[SessionManagerクラスのインスタンス生成]
+    |
+    v
+[セッションを開始 (startSession())]
+    |
+    v
+[リクエストに基づいて処理を選択]
+    |
+    +---------------------------+
+    |                           |
+    v                           v
+[ログイン処理 (login())]       [ログアウト処理 (logout())]
+    |                           |
+    v                           v
+[ユーザー名でDBから情報取得]    [セッションを破棄してログアウト]
+    |                           |
+    v                           v
+[パスワードが一致するか確認]   [リダイレクトなどの処理]
+    |                           |
+    +---------> [一致]          |
+    |             |             |
+    |             v             |
+    |     [セッションにuser_id保存]
+    |             |
+    |             v
+    +-> [ログイン成功 -> trueを返す]
+    |
+    +-> [ログイン失敗 -> falseを返す]
+
+    |
+    v
+[新規ユーザー登録 (register())]
+    |
+    v
+[パスワードをハッシュ化]
+    |
+    v
+[ユーザー名とハッシュ化パスワードをDBに保存]

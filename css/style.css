@@ -1,175 +1,176 @@
-/* リセットCSS */
+/* リセット */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
 }
 
+/* 基本スタイル */
 body {
-  background-color: #f4f4f9;
-  color: #333;
+  font-family: Arial, sans-serif;
   line-height: 1.6;
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  width: 80%;
-  margin: auto;
-  overflow: hidden;
-}
-
-header {
-  background: #50b3a2;
-  color: #fff;
-  padding-top: 30px;
-  min-height: 70px;
-  border-bottom: #e8491d 3px solid;
-}
-
-header a {
-  color: #fff;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: 16px;
-}
-
-header ul {
-  padding: 0;
-  list-style: none;
-}
-
-header li {
-  float: left;
-  display: inline;
-  padding: 0 20px 0 20px;
-}
-
-header #branding {
-  float: left;
-}
-
-header #branding h1 {
-  margin: 0;
-}
-
-header nav {
-  float: right;
-  margin-top: 10px;
-}
-
-header .highlight,
-header .current a {
-  color: #e8491d;
-  font-weight: bold;
-}
-
-header a:hover {
-  color: #cccccc;
-  font-weight: bold;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 20px;
 }
 
 h1 {
-  text-align: center;
-  margin: 20px 0;
+  font-size: 2em;
+  margin-bottom: 20px;
   color: #333;
 }
 
-.post-form,
-.post-list {
-  background: #fff;
+/* フォームスタイル */
+form {
+  margin-bottom: 20px;
+  background-color: #fff;
   padding: 20px;
-  margin: 20px 0;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-.post-form__flex,
-.btn-flex {
-  display: flex;
-  flex-direction: column;
-}
-
-.post-form__flex label,
-.btn-flex button {
+label {
+  display: block;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 input[type="text"],
+input[type="password"],
 textarea {
   width: 100%;
   padding: 10px;
-  margin: 5px 0 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 button {
-  background: #50b3a2;
+  padding: 10px 15px;
+  background-color: #007bff;
   color: #fff;
   border: none;
-  padding: 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
 button:hover {
-  background: #e8491d;
+  background-color: #0056b3;
 }
 
-.err {
-  color: red;
+/* ログアウトリンクスタイル */
+.logout-link {
+  margin-bottom: 20px;
+}
+
+.logout-link a {
+  padding: 10px 15px;
+  background-color: #dc3545;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
   font-weight: bold;
+  display: inline-block;
 }
 
+.logout-link a:hover {
+  background-color: #c82333;
+  color: #fff;
+}
+
+/* 投稿リスト */
 .post-list ul {
-  list-style: none;
-  padding: 0;
+  list-style-type: none;
 }
 
 .post-list li {
-  background: #fff;
-  padding: 20px;
-  margin: 10px 0;
-  border-radius: 5px;
+  background-color: #fff;
+  margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.post-list .post-datetime,
-.post-list .post-datetime__updated {
+.post-list span {
   display: block;
-  color: #999;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.post-list p {
+  margin-bottom: 10px;
+}
+
+.post-list img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* ページネーション */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination a {
+  margin: 0 5px;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #007bff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pagination a:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.pagination a.current-page {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* ボタンスタイル */
+.btn-flex {
+  display: flex;
+}
+
+.btn-flex button {
   margin-top: 10px;
 }
 
-.no-post-msg {
-  text-align: center;
-  font-size: 1.2em;
-  color: #999;
+/* エラーメッセージ */
+.err {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
 }
 
-.delete-confirm-msg,
-.delete-success-msg {
-  text-align: center;
-  font-size: 1.2em;
-  margin: 20px 0;
-  color: #333;
+/* 投稿フォーム */
+.post-form__flex {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-form__flex div {
+  margin-bottom: 10px;
 }
 
 .p-pre {
   white-space: pre-wrap;
-  word-wrap: break-word;
 }
 
-footer {
-  background: #333;
-  color: #fff;
-  text-align: center;
-  padding: 20px;
-  margin-top: 20px;
+/* メッセージ */
+.delete-confirm-msg,
+.delete-success-msg {
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
-footer p {
-  margin: 0;
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .post-form__flex {
+    flex-direction: column;
+  }
 }

@@ -21,7 +21,9 @@ $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
 
 // 掲示板のメイン処理を開始
 $board = new Board();
+
 $board->handlePostRequest(); // ユーザーの投稿リクエストを処理m、
+
 // 検索キーワードがある場合の処理と通常の投稿取得処理
 if (!empty($keyword)) {
     // 検索キーワードがある場合の処理
@@ -32,7 +34,9 @@ if (!empty($keyword)) {
     $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
     $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
 }
+
 $token = $board->generateToken(); // CSRFトークンを生成
+
 $user_id = $_SESSION['user_id']; // ログインしたユーザーのIDを取得
 
 // 総投稿数を取得し、総ページ数を計算
@@ -51,7 +55,10 @@ $total_pages = ceil($total_posts / $limit);
     <h1>掲示板アプリ</h1>
 
     <!-- ログアウトリンク -->
-    <a href="logout.php">ログアウト</a>
+    <!-- ログアウトリンク -->
+    <div class="logout-link">
+        <a href="logout.php">ログアウト</a>
+    </div>
 
     <!-- 検索フォーム -->
     <form action="board.php" method="get">

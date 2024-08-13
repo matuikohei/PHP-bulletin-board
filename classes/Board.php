@@ -16,7 +16,6 @@ class Board {
     // コンストラクタ: セッションの初期化とログイン状態の確認を行う。
     public function __construct() {
         // セッション管理クラスとデータベースクラスのインスタンスを作成
-        // インスタンス->プロパティ名とすることで、そのインスタンスのプロパティにアクセスすることができる（プロパティ名に$は不要）
         $this->sessionManager = new SessionManager();
         $this->db = new Database();
 
@@ -69,18 +68,22 @@ class Board {
         }
     }
 
-    /**
-     * 画像アップロードを処理するメソッド。
-     *
-     * @return string|bool アップロードされた画像のパス、または失敗時はfalseを返す。
-     */
+
+    // 画像アップロードを処理するメソッド。
     private function handleImageUpload() {
+        // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
+            // アップロードされた画像を保存するディレクトリを指定
             $uploadDir = 'uploads/';
+            // 保存先のファイルパスを生成（ディレクトリ + ファイル名）
             $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+
+            // アップロードされた画像ファイルを指定したディレクトリに移動
             if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
+                // 移動に成功した場合、保存先のファイルパスを返す
                 return $uploadFile;
             } else {
+                // 画像の移動に失敗した場合、エラーメッセージを設定し、falseを返す
                 $this->err_msg_image = '画像のアップロードに失敗しました';
                 return false;
             }
@@ -88,111 +91,57 @@ class Board {
         return '';
     }
 
-    /**
-     * 指定されたページの投稿を取得するメソッド
-     *
-     * @param int $page 現在のページ番号
-     * @param int $limit 1ページあたりの表示件数
-     * @return array 投稿データの配列を返す
-     */
+    //  指定されたページの投稿を取得するメソッド
     public function getPosts($page = 1, $limit = 10) {
         return $this->db->fetchPostsByPage($page, $limit);
     }
 
-    /**
-     * 投稿の総数を取得するメソッド
-     *
-     * @return int 投稿の総数を返す
-     */
+    // 投稿の総数を取得するメソッド
     public function getTotalPostCount() {
         return $this->db->countAllPosts();
     }
 
-    /**
-     * 検索キーワードに基づいて投稿を取得するメソッド
-     *
-     * @param string $keyword 検索キーワード
-     * @param int $page 現在のページ番号
-     * @param int $limit 1ページあたりの表示件数
-     * @return array 検索結果の投稿データの配列を返す
-     */
+    // 検索キーワードに基づいて投稿を取得するメソッド
     public function searchPosts($keyword, $page = 1, $limit = 10) {
         return $this->db->searchPosts($keyword, $page, $limit);
     }
 
-    /**
-     * 検索結果の投稿総数を取得するメソッド
-     *
-     * @param string $keyword 検索キーワード
-     * @return int 検索結果の投稿総数を返す
-     */
+    // 検索結果の投稿総数を取得するメソッド
     public function countSearchResults($keyword) {
         return $this->db->countSearchResults($keyword);
     }
 
-    /**
-     * CSRFトークンを生成するメソッド。
-     *
-     * @return string CSRFトークンを返す。
-     */
+    // CSRFトークンを生成するメソッド。
     public function generateToken() {
         return $this->sessionManager->setToken();
     }
 
-    /**
-     * タイトルのエラーメッセージを取得するメソッド。
-     *
-     * @return string エラーメッセージを返す。
-     */
+    // タイトルのエラーメッセージを取得するメソッド。
     public function getErrMsgTitle() {
         return $this->err_msg_title;
     }
 
-    /**
-     * コメントのエラーメッセージを取得するメソッド。
-     *
-     * @return string エラーメッセージを返す。
-     */
+    // コメントのエラーメッセージを取得するメソッド。
     public function getErrMsgComment() {
         return $this->err_msg_comment;
     }
 
-    /**
-     * 画像のエラーメッセージを取得するメソッド。
-     *
-     * @return string エラーメッセージを返す。
-     */
+    // 画像のエラーメッセージを取得するメソッド。
     public function getErrMsgImage() {
         return $this->err_msg_image;
     }
 
-    /**
-     * 投稿を削除するメソッド。
-     *
-     * @param int $post_id 削除する投稿のID。
-     */
+    // 投稿を削除するメソッド。
     public function deletePost($post_id) {
         $this->db->deletePost($post_id);
     }
 
-    /**
-     * 投稿IDに基づいて投稿を取得するメソッド。
-     *
-     * @param int $post_id 取得する投稿のID。
-     * @return array 投稿データを返す。
-     */
+    // 投稿IDに基づいて投稿を取得するメソッド。
     public function getPostById($post_id) {
         return $this->db->getPostById($post_id);
     }
 
-    /**
-     * 投稿を更新するメソッド。
-     *
-     * @param int $id 更新する投稿のID。
-     * @param string $title 更新後のタイトル。
-     * @param string $comment 更新後のコメント。
-     * @param string $imagePath 更新後の画像パス。
-     */
+    // 投稿を更新するメソッド。
     public function updatePost($id, $title, $comment, $imagePath) {
         $this->db->updatePost($id, $title, $comment, $imagePath);
     }
