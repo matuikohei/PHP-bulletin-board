@@ -25,21 +25,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>ログイン</h1>
-    <?php if (isset($error)) echo "<p class='err'>$error</p>"; ?>
-    <form action="login.php" method="post">
-        <label for="username">ユーザー名</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">パスワード</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">ログイン</button>
-    </form>
-    <!-- 新規登録ボタンを追加 -->
-    <div>
-        <p>新規登録をご希望の方は、こちらから</p>
-        <a href="register.php">
-            <button>新規登録はこちら</button>
-        </a>
+    <div class="container">
+        <h1 class="title">ログイン</h1>
+        <?php if (isset($error)) echo "<p class='err'>$error</p>"; ?>
+
+        <form action="login.php" method="post">
+            <label for="username">ユーザー名</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit" name="login_button">ログイン</button>
+        </form>
+
+        <!-- 新規登録ボタンを追加 -->
+        <div class="register-link-container">
+            <p>新規登録をご希望の方は、こちらから</p>
+            <a href="register.php">
+                <button name="register_link_button">新規登録はこちら</button>
+            </a>
+        </div>
     </div>
 </body>
 </html>

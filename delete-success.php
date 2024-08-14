@@ -14,7 +14,9 @@ $deleteSuccess->redirectToBoard();
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>削除が完了しました。</h1>
-    <p class="delete-success-msg">3秒後に自動で掲示板TOPへ戻ります。</p>
+    <div class="container">
+        <h1>削除が完了しました。</h1>
+        <p class="delete-success-msg">3秒後に自動で掲示板TOPへ戻ります。</p>
+    </div>
 </body>
 </html>

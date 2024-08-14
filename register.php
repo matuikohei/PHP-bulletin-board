@@ -21,13 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>ユーザー登録</h1>
-    <form action="register.php" method="post">
-        <label for="username">ユーザー名</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">パスワード</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">登録</button>
-    </form>
+    <div class="container">
+        <h1 class="title">ユーザー登録</h1>
+        <form action="register.php" method="post">
+            <label for="username">ユーザー名</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">パスワード</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit" name="register_button">登録</button>
+        </form>
+    </div>
 </body>
 </html>
