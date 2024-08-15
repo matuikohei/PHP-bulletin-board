@@ -11,12 +11,14 @@ $err_msg_comment = $updateEdit->getErrMsgComment();
 
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>掲示板アプリ</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="container">
         <h1 class="title">投稿編集画面</h1>
@@ -57,4 +59,5 @@ $err_msg_comment = $updateEdit->getErrMsgComment();
         </section>
     </div>
 </body>
+
 </html>

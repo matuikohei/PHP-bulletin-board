@@ -212,6 +212,28 @@ if (!empty($keyword)) {
     |
     v
 [データベースから指定されたキーワードで投稿を検索 (searchPosts())]
+public function searchPosts($keyword, $page = 1, $limit = 10) {
+    return $this->db->searchPosts($keyword, $page, $limit);
+}
+Database.phpのsearchPostsを呼び出す
+
+引数になっている$keywordはboard.phpの以下の流れで渡される
+
+検索フォームに文字が入力される。method="get"が使われているので、$_GETへ情報が送られる
+<form action="board.php" method="get">
+                <input type="text" name="keyword" placeholder="検索キーワードを入力">
+                <button type="submit" name="search_button">検索</button>
+                <?php if (!empty($keyword)): ?>
+                    <a href="board.php">全て表示</a>
+                <?php endif; ?>
+            </form>
+
+送られてきた情報を$keywordに格納
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+
+検索結果を持ってくるために作られたsearchPostsを使って、($keyword, $page, $limit)をもとに検索結果を持ってきて、
+検索結果を格納するための$post_listという箱に格納される
+$post_list = $board->searchPosts($keyword, $page, $limit);
     |
     v
 [取得した検索結果を返す]
@@ -222,12 +244,25 @@ if (!empty($keyword)) {
 -------------------------------------------------------------------
 
 [countSearchResults()メソッド]
+public function searchPosts($keyword, $page = 1, $limit = 10) {
+        return $this->db->searchPosts($keyword, $page, $limit);
+}
     |
     v
 [データベースから検索結果の投稿総数を取得 (countSearchResults())]
     |
     v
 [取得した検索結果の総数を返す]
+このメソッドは、board.phpで呼び出されて、結果は、$total_postsに格納される
+if (!empty($keyword)) {
+    // 検索キーワードがある場合の処理
+    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
+    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
+} else {
+    // 通常の投稿取得処理
+    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
+    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
+}
     |
     v
 [終了]
@@ -238,9 +273,12 @@ if (!empty($keyword)) {
     |
     v
 [セッションマネージャーを使ってCSRFトークンを生成 (setToken())]
+SessionManager.phpのsetTokenを呼び出す。
     |
     v
 [生成されたトークンを返す]
+board.phpの$tokenへトークンを返す
+$token = $board->generateToken(); // CSRFトークンを生成
     |
     v
 [終了]
@@ -248,9 +286,34 @@ if (!empty($keyword)) {
 -------------------------------------------------------------------
 
 [getErrMsgTitle()メソッド]
+public function getErrMsgTitle() {
+    return $this->err_msg_title;
+}
+
+タイトル欄がからの場合は、Board.phpの
+if (isset($_POST['post_title']) && $_POST['post_title'] != '') {
+    $_SESSION['title'] = $_POST['post_title'];
+    } else {
+    unset($_SESSION['title']);
+    $this->err_msg_title = '※タイトルを入力して下さい';
+}
+このコードの処理によって、private $err_msg_title = '';にタイトルを入力して下さいと格納して結果を返す。
+タイトルが記載されている場合は、private $err_msg_title = '';を空の箱のまま返す。
     |
     v
 [タイトルのエラーメッセージを返す]
+このメソッドはboard.phpで呼び出される。
+board.phpのコードでは、$err_msg_titleが空の場合は、何も処理をしないで、$err_msg_titleに文字が入力されている場合のみ処理を行う
+<label>
+    <p>タイトル（※最大30文字）</p>
+    <input type="text" name="post_title" value="<?php if (isset($_SESSION['title'])) echo htmlspecialchars($_SESSION['title'], ENT_QUOTES, 'UTF-8'); ?>">
+    <!-- タイトルのエラーメッセージ表示 -->
+    <?php if (!empty($board->getErrMsgTitle())) {
+        echo "<p class='err'>" . htmlspecialchars($board->getErrMsgTitle(), ENT_QUOTES, 'UTF-8') . "</p>";
+    } ?>
+</label>
+
+
     |
     v
 [終了]
@@ -258,6 +321,7 @@ if (!empty($keyword)) {
 -------------------------------------------------------------------
 
 [getErrMsgComment()メソッド]
+上のタイトルのメソッドと流れは同じ
     |
     v
 [コメントのエラーメッセージを返す]
@@ -268,6 +332,7 @@ if (!empty($keyword)) {
 -------------------------------------------------------------------
 
 [getErrMsgImage()メソッド]
+基本的な流れは上と同じ。だけどエラーメッセージを作成するコードは、別の場所
     |
     v
 [画像のエラーメッセージを返す]
@@ -278,12 +343,29 @@ if (!empty($keyword)) {
 -------------------------------------------------------------------
 
 [deletePost()メソッド]
+public function deletePost($post_id) {
+        $this->db->deletePost($post_id);
+}
+
+このコードの呼び出しもとは、DeleteConfirm.php
+
+delete-confirm.phpの以下のコードでDeleteConfirm.phpのhandleRequestメソッドが呼び出される。このDeleteConfirm.phpのhandleRequestメソッドがBoard.phpのdeletePostを呼び出す。Board.phpのdeletePostを呼び出す時に、($_SESSION['id']);を引数として、($post_id)に渡す。
+$this->db->deletePost($_SESSION['id']);
+
+Board.phpのdeletePostがDatabase.php の deletePost メソッドを呼び出す。
+
     |
     v
 [データベースから指定された投稿を削除 (deletePost())]
     |
     v
 [終了]
+
+
+1.	削除ボタンをクリック: ユーザーが board.php で削除ボタンをクリックするとdelete-confirm.php に post_id が送信されます。
+2.	delete-confirm.php 内で処理: 送信された post_id は $_SESSION['id'] に保存されます。
+3.	deletePost() メソッドの呼び出し: deletePost() メソッド内で $_SESSION['id'] が取得され、それが deletePost($post_id) に引数として渡されます。
+4.	Database.php 内の処理: 最終的に Database.php 内の deletePost($post_id) が呼び出され、指定された投稿が削除されます。
 
 -------------------------------------------------------------------
 

@@ -7,14 +7,16 @@
 require_once 'Database.php';
 require_once 'SessionManager.php';
 
-class User {
+class User
+{
     // データベース接続を管理するDatabaseクラスのインスタンス
     private $db;
     // セッション管理を行うSessionManagerクラスのインスタンス
     private $sessionManager;
 
     // コンストラクタ：クラスがインスタンス化されたときに呼び出される
-    public function __construct() {
+    public function __construct()
+    {
         // Databaseクラスのインスタンスを生成
         $this->db = new Database();
         // SessionManagerクラスのインスタンスを生成
@@ -24,7 +26,8 @@ class User {
     }
 
     // ユーザーのログインを処理するメソッド
-    public function login($username, $password) {
+    public function login($username, $password)
+    {
         // ユーザー名に基づいてデータベースからユーザー情報を取得
         $stmt = $this->db->getPdo()->prepare('SELECT * FROM users WHERE username = :username');
         $stmt->bindValue(':username', $username, PDO::PARAM_STR);
@@ -36,28 +39,31 @@ class User {
             // セッションにユーザーIDとユーザー名を保存し、ログイン状態に設定
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            return true;// ログイン成功
+            return true; // ログイン成功
         }
-        return false;// ログイン失敗
+        return false; // ログイン失敗
     }
 
     // ユーザーがログインしているかを確認するメソッド
-    public function isLoggedIn() {
-        return isset($_SESSION['user_id']);// セッションにuser_idが設定されていればログイン中と見なす
+    public function isLoggedIn()
+    {
+        return isset($_SESSION['user_id']); // セッションにuser_idが設定されていればログイン中と見なす
     }
 
     // ユーザーのログアウトを処理するメソッド
-    public function logout() {
+    public function logout()
+    {
         session_destroy(); // セッションを破棄し、ログアウト状態にする
     }
 
     // 新しいユーザーを登録するメソッド
-    public function register($username, $password) {
+    public function register($username, $password)
+    {
         // パスワードを安全にハッシュ化してからデータベースに保存（SQLインジェクション対策）
         $stmt = $this->db->getPdo()->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
         $stmt->bindValue(':username', $username, PDO::PARAM_STR);
         $stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT), PDO::PARAM_STR);
-        $stmt->execute();// クエリを実行し、新しいユーザーをデータベースに追加
+        $stmt->execute(); // クエリを実行し、新しいユーザーをデータベースに追加
     }
 }
 ?>

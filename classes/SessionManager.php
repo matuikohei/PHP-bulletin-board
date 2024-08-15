@@ -1,8 +1,10 @@
 <!-- セッション管理を行うクラス -->
 
 <?php
-class SessionManager {
-    public function startSession() {
+class SessionManager
+{
+    public function startSession()
+    {
         // すでにセッションが開始されているか確認
         if (session_status() == PHP_SESSION_NONE) {
             ini_set('session.gc_maxlifetime', 1800);
@@ -24,7 +26,8 @@ class SessionManager {
     }
 
     // セッションの有効期限を確認するメソッド
-    private function isSessionExpired() {
+    private function isSessionExpired()
+    {
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
             return true;
         }
@@ -32,14 +35,16 @@ class SessionManager {
     }
 
     // CSRFトークンを生成するメソッド
-    public function setToken() {
+    public function setToken()
+    {
         $token = sha1(uniqid(mt_rand(), true));
         $_SESSION['board_token'] = $token;
         return $token;
     }
 
     // CSRFトークンを検証するメソッド
-    public function validateToken($token) {
+    public function validateToken($token)
+    {
         if (empty($_SESSION['board_token']) || ($_SESSION['board_token'] !== $token)) {
             exit('不正な投稿です');
         }
@@ -48,17 +53,20 @@ class SessionManager {
     }
 
     // ユーザーがログインしているか確認するメソッド
-    public function isLoggedIn() {
+    public function isLoggedIn()
+    {
         return isset($_SESSION['user_id']);
     }
 
     // ログイン状態を設定するメソッド
-    public function loginUser($user_id) {
+    public function loginUser($user_id)
+    {
         $_SESSION['user_id'] = $user_id;
     }
 
     // ログアウト処理を行うメソッド
-    public function logoutUser() {
+    public function logoutUser()
+    {
         session_unset();
         session_destroy();
     }

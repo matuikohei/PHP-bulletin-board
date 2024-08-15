@@ -45,12 +45,14 @@ $total_pages = ceil($total_posts / $limit);
 
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>掲示板アプリ</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <section class="header">
         <div class="header-title-box">
@@ -96,8 +98,8 @@ $total_pages = ceil($total_posts / $limit);
                         <input type="file" name="post_image">
                         <!-- 画像のエラーメッセージ表示 -->
                         <?php if (!empty($board->getErrMsgImage())) {
-                                echo "<p class='err'>" . htmlspecialchars($board->getErrMsgImage(), ENT_QUOTES, 'UTF-8') . "</p>";
-                            }
+                            echo "<p class='err'>" . htmlspecialchars($board->getErrMsgImage(), ENT_QUOTES, 'UTF-8') . "</p>";
+                        }
                         ?>
                     </label>
                 </div>
@@ -178,4 +180,5 @@ $total_pages = ceil($total_posts / $limit);
         </section>
     </div>
 </body>
+
 </html>

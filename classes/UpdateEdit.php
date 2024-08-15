@@ -3,20 +3,23 @@
 require_once 'classes/SessionManager.php';
 require_once 'classes/Database.php';
 
-class UpdateEdit {
+class UpdateEdit
+{
     private $sessionManager;
     private $db;
     private $err_msg_title = '';
     private $err_msg_comment = '';
     private $err_msg_image = '';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->sessionManager = new SessionManager();
         $this->db = new Database();
         $this->sessionManager->startSession();
     }
 
-    public function handleRequest() {
+    public function handleRequest()
+    {
         if (isset($_POST['update_btn'])) {
             $this->getPostInfo();
         } elseif (isset($_POST['update_submit_btn'])) {
@@ -26,7 +29,8 @@ class UpdateEdit {
         }
     }
 
-    private function getPostInfo() {
+    private function getPostInfo()
+    {
         if (isset($_POST['post_id']) && $_POST['post_id'] != '') {
             $_SESSION['id'] = $_POST['post_id'];
             try {
@@ -46,7 +50,8 @@ class UpdateEdit {
         }
     }
 
-    private function updatePost() {
+    private function updatePost()
+    {
         $this->validateToken();
         $this->validateInputs();
         if ($this->isValid()) {
@@ -54,14 +59,16 @@ class UpdateEdit {
         }
     }
 
-    private function validateToken() {
+    private function validateToken()
+    {
         if (empty($_SESSION['board_token']) || ($_SESSION['board_token'] !== $_POST['board_token'])) {
             exit('不正な投稿です');
         }
         unset($_SESSION['board_token']);
     }
 
-    private function validateInputs() {
+    private function validateInputs()
+    {
         if (isset($_POST['post_title']) && $_POST['post_title'] != '') {
             $_SESSION['title'] = $_POST['post_title'];
         } else {
@@ -79,7 +86,8 @@ class UpdateEdit {
         $this->handleImageUpload(); // 画像アップロード処理
     }
 
-    private function handleImageUpload() {
+    private function handleImageUpload()
+    {
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
             $uploadDir = 'uploads/';
             $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
@@ -91,11 +99,13 @@ class UpdateEdit {
         }
     }
 
-    private function isValid() {
+    private function isValid()
+    {
         return empty($this->err_msg_title) && empty($this->err_msg_comment) && empty($this->err_msg_image);
     }
 
-    private function executeUpdate() {
+    private function executeUpdate()
+    {
         try {
             $pdo = $this->db->getPdo();
             $sql = 'UPDATE board_info SET title = :TITLE, comment = :COMMENT, image_path = :IMAGE_PATH WHERE id = :ID';
@@ -114,25 +124,30 @@ class UpdateEdit {
         }
     }
 
-    private function cancelUpdate() {
+    private function cancelUpdate()
+    {
         unset($_SESSION['id'], $_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
         header('Location: board.php');
         exit();
     }
 
-    public function getErrMsgTitle() {
+    public function getErrMsgTitle()
+    {
         return $this->err_msg_title;
     }
 
-    public function getErrMsgComment() {
+    public function getErrMsgComment()
+    {
         return $this->err_msg_comment;
     }
 
-    public function getErrMsgImage() {
+    public function getErrMsgImage()
+    {
         return $this->err_msg_image;
     }
 
-    public function generateToken() {
+    public function generateToken()
+    {
         $token = $this->sessionManager->setToken();
         $_SESSION['board_token'] = $token;
         return $token;

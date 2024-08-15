@@ -6,7 +6,8 @@
 require_once 'SessionManager.php';
 require_once 'Database.php';
 
-class Board {
+class Board
+{
     private $sessionManager;
     private $db;
     private $err_msg_title = '';
@@ -14,7 +15,8 @@ class Board {
     private $err_msg_image = '';
 
     // コンストラクタ: セッションの初期化とログイン状態の確認を行う。
-    public function __construct() {
+    public function __construct()
+    {
         // セッション管理クラスとデータベースクラスのインスタンスを作成
         $this->sessionManager = new SessionManager();
         $this->db = new Database();
@@ -30,7 +32,8 @@ class Board {
     }
 
     // 投稿リクエストを処理するメソッド
-    public function handlePostRequest() {
+    public function handlePostRequest()
+    {
         // フォームが送信されたか確認
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // CSRFトークンの検証
@@ -70,7 +73,8 @@ class Board {
 
 
     // 画像アップロードを処理するメソッド。
-    private function handleImageUpload() {
+    private function handleImageUpload()
+    {
         // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
             // アップロードされた画像を保存するディレクトリを指定
@@ -92,58 +96,69 @@ class Board {
     }
 
     //  指定されたページの投稿を取得するメソッド
-    public function getPosts($page = 1, $limit = 10) {
+    public function getPosts($page = 1, $limit = 10)
+    {
         return $this->db->fetchPostsByPage($page, $limit);
     }
 
     // 投稿の総数を取得するメソッド
-    public function getTotalPostCount() {
+    public function getTotalPostCount()
+    {
         return $this->db->countAllPosts();
     }
 
     // 検索キーワードに基づいて投稿を取得するメソッド
-    public function searchPosts($keyword, $page = 1, $limit = 10) {
+    public function searchPosts($keyword, $page = 1, $limit = 10)
+    {
         return $this->db->searchPosts($keyword, $page, $limit);
     }
 
     // 検索結果の投稿総数を取得するメソッド
-    public function countSearchResults($keyword) {
+    public function countSearchResults($keyword)
+    {
         return $this->db->countSearchResults($keyword);
     }
 
     // CSRFトークンを生成するメソッド。
-    public function generateToken() {
+    public function generateToken()
+    {
         return $this->sessionManager->setToken();
     }
 
     // タイトルのエラーメッセージを取得するメソッド。
-    public function getErrMsgTitle() {
+    public function getErrMsgTitle()
+    {
         return $this->err_msg_title;
     }
 
     // コメントのエラーメッセージを取得するメソッド。
-    public function getErrMsgComment() {
+    public function getErrMsgComment()
+    {
         return $this->err_msg_comment;
     }
 
     // 画像のエラーメッセージを取得するメソッド。
-    public function getErrMsgImage() {
+    public function getErrMsgImage()
+    {
         return $this->err_msg_image;
     }
 
-    // 投稿を削除するメソッド。
-    public function deletePost($post_id) {
-        $this->db->deletePost($post_id);
-    }
+    // 投稿を削除するメソッド。 削除予定のメソッド
+    // public function deletePost($post_id)
+    // {
+    //     $this->db->deletePost($post_id);
+    // }
 
-    // 投稿IDに基づいて投稿を取得するメソッド。
-    public function getPostById($post_id) {
-        return $this->db->getPostById($post_id);
-    }
+    // 投稿IDに基づいて投稿を取得するメソッド。　削除予定のメソッド
+    // public function getPostById($post_id)
+    // {
+    //     return $this->db->getPostById($post_id);
+    // }
 
-    // 投稿を更新するメソッド。
-    public function updatePost($id, $title, $comment, $imagePath) {
-        $this->db->updatePost($id, $title, $comment, $imagePath);
-    }
+    // // 投稿を更新するメソッド。 削除予定のメソッド
+    // public function updatePost($id, $title, $comment, $imagePath)
+    // {
+    //     $this->db->updatePost($id, $title, $comment, $imagePath);
+    // }
 }
 ?>
