@@ -142,23 +142,5 @@ class Board
     {
         return $this->err_msg_image;
     }
-
-    // 投稿を削除するメソッド。 削除予定のメソッド
-    // public function deletePost($post_id)
-    // {
-    //     $this->db->deletePost($post_id);
-    // }
-
-    // 投稿IDに基づいて投稿を取得するメソッド。　削除予定のメソッド
-    // public function getPostById($post_id)
-    // {
-    //     return $this->db->getPostById($post_id);
-    // }
-
-    // // 投稿を更新するメソッド。 削除予定のメソッド
-    // public function updatePost($id, $title, $comment, $imagePath)
-    // {
-    //     $this->db->updatePost($id, $title, $comment, $imagePath);
-    // }
 }
 ?>

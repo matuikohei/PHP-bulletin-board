@@ -398,6 +398,175 @@ Board.phpのdeletePostがDatabase.php の deletePost メソッドを呼び出す
 
 
 
+<Database.php フローチャート>
+[Databaseクラスのインスタンス生成]
+    |
+    v
+[ConfigクラスからDSN、ユーザー名、パスワードを取得]
+$dsn = Config::DB_HOST;
+$username = Config::DB_USER;
+$password = Config::DB_PASSWORD;
+    |
+    v
+[PDOオブジェクトの生成 (try-catch)]
+public function __construct()
+    {
+        // DSNの設定をConfigクラスから読み込む
+        $dsn = Config::DB_HOST;
+        $username = Config::DB_USER;
+        $password = Config::DB_PASSWORD;
+
+        try {
+            $this->pdo = new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            // エラーメッセージを表示
+            echo '接続失敗: ' . $e->getMessage();
+            exit();
+        }
+    }
+
+上記のコードで、Database.phpのpdoの中にPDOオブジェクトを格納している。
+
+<tryブロック>
+あなたがホテルにチェックインしようとしているとします。チェックインカウンターに行って、部屋の予約確認をしますね。この部分が「tryブロック」に相当します。「試してみる」段階です。
+new PDO($dsn, $username, $password, [...]) は、データベースに接続するための新しい「鍵」を作る作業。鍵（PDOオブジェクト）を使ってデータベース（ホテルの部屋）にアクセスできるようにする。
+PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION: これは、「部屋がない」とか「予約が見つからない」（データーベースがない）といったエラーが発生したときに、すぐにスタッフ（PDO）に知らせる設定。
+PDO::ATTR_EMULATE_PREPARES => false: これは、ホテルのスタッフ（PDO）が正確に予約内容を確認するようにするための設定。
+
+<catchブロック>
+catch (PDOException $e) {
+    echo '接続失敗: ' . $e->getMessage();
+    exit();
+}
+
+チェックインを試みたけど、予約が見つからなかった場合どうしますか？カウンターで「予約が見つかりません」と伝えられるでしょう。この部分が「catchブロック」に相当します。
+
+catch (PDOException $e): これは、もしチェックインがうまくいかなかったら（例: 予約が見つからなかったら）、エラーメッセージをキャッチして処理します。
+
+echo '接続失敗: ' . $e->getMessage();: ここでは、エラーメッセージを表示します。「接続失敗: 〇〇」という形で、何が問題だったかを教えてくれます。
+
+exit();: そして、そこで処理を終了します。これ以上進めることができないためです。
+
+    |
+    +--> [成功: PDOオブジェクトを生成して保持]
+    |
+    +--> [失敗: 例外をキャッチしてエラーメッセージを表示]
+    |
+    v
+[リクエストに基づいて処理を選択]
+    |
+    +--> [insertPost()]
+    |      |
+    |      v
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [完了]
+    |
+    +--> [fetchAllPosts()]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [結果を配列で返す]
+    |      |
+    |    [完了]
+    |
+    +--> [searchPosts()]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [結果を配列で返す]
+    |      |
+    |    [完了]
+    |
+    +--> [fetchPostsByPage()]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [結果を配列で返す]
+    |      |
+    |    [完了]
+    |
+    +--> [countAllPosts()]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [投稿総数を返す]
+    |      |
+    |    [完了]
+    |
+    +--> [deletePost()]
+    |      |
+    |    [画像パス取得]
+    |      |
+    |    [画像削除 (unlink)]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [完了]
+    |
+    +--> [updatePost()]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [完了]
+    |
+    +--> [insertUser()]
+    |      |
+    |    [パスワードのハッシュ化]
+    |      |
+    |    [SQL文の準備]
+    |      |
+    |    [パラメータのバインド]
+    |      |
+    |    [クエリの実行]
+    |      |
+    |    [完了]
+    |
+    +--> [getUserByUsername()]
+           |
+           v
+        [SQL文の準備]
+           |
+        [パラメータのバインド]
+           |
+        [クエリの実行]
+           |
+        [結果を配列で返す]
+           |
+        [完了]
+
+
+
+
+
+
 
 <SessionManager.php フローチャート>
 [セッション開始を確認 (startSession)]

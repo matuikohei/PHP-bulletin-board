@@ -8,8 +8,57 @@ cssの作成
 説明の作成
 19,20
 
+PHP BULLETIN BOARD /
+・classes/
+Board.php
+Config.php
+Database.php
+DeleteConfirm.php
+DeleteSuccess.php
+SessionManager.php
+UpdateEdit.php
+User.php
+
+・css/
+styles.css
+
+・text/
+flowchart.text
+NOTES.test
+
+board.php
+delete-confirm.php
+delete-success.php
+login.php
+logout.php
+register.php
+update-edit.php
+README.md
 
 
+
+
+PHP BULLETIN BOARD/
+├── classes/
+│   ├── Board.php
+│   ├── Config.php
+│   ├── Config.php
+│   ├── Config.php
+│   ├── Config.php
+│   └── Database.php
+│
+│
+│
+│
+│
+├── test/
+│   ├── main.test.js
+│   └── app.test.js
+├── assets/
+│   ├── styles.css
+│   └── logo.png
+├── README.md
+└── package.json
 
 
 
