@@ -137,15 +137,6 @@ class Database
         $stmt->execute();
     }
 
-    // 投稿情報を取得するメソッド　削除予定のメソッド
-    // public function getPostById($post_id)
-    // {
-    //     $stmt = $this->pdo->prepare('SELECT * FROM board_info WHERE id = :id');
-    //     $stmt->bindValue(':id', $post_id, PDO::PARAM_INT);
-    //     $stmt->execute();
-    //     return $stmt->fetch(PDO::FETCH_ASSOC);
-    // }
-
     // 投稿を更新するメソッド
     public function updatePost($id, $title, $comment, $imagePath)
     {
