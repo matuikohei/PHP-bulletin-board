@@ -112,13 +112,5 @@ class Database
         $stmt->execute();
     }
 
-    // 追加: ユーザー情報を取得するメソッド
-    // public function getUserByUsername($username)
-    // {
-    //     $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = :username');
-    //     $stmt->bindValue(':username', $username, PDO::PARAM_STR);
-    //     $stmt->execute();
-    //     return $stmt->fetch(PDO::FETCH_ASSOC);
-    // }
 }
 ?>
