@@ -112,17 +112,6 @@ class Database
         $stmt->execute();
     }
 
-    // 投稿を更新するメソッド  削除予定のメソッド
-    // public function updatePost($id, $title, $comment, $imagePath)
-    // {
-    //     $stmt = $this->pdo->prepare('UPDATE board_info SET title = :title, comment = :comment, image_path = :image_path WHERE id = :id');
-    //     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-    //     $stmt->bindValue(':title', $title, PDO::PARAM_STR);
-    //     $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
-    //     $stmt->bindValue(':image_path', $imagePath, PDO::PARAM_STR);
-    //     $stmt->execute();
-    // }
-
     // 追加: ユーザーをデータベースに保存するメソッド 削除予定のメソッド
     // public function insertUser($username, $password)
     // {
