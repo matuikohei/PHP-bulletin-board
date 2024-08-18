@@ -43,14 +43,6 @@ class Database
         $stmt->execute();
     }
 
-    // 投稿データをデータベースから取得するためのメソッド（降順）。　今は使っていないから削除予定
-    // public function fetchAllPosts()
-    // {
-    //     $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC');
-    //     $stmt->execute();
-    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // }
-
     // 検索キーワードに基づいて投稿を検索するメソッド
     public function searchPosts($keyword, $page, $limit)
     {
