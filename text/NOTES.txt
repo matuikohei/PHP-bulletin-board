@@ -1,43 +1,3 @@
-13,14
-掲示板アプリのコードの理解、コード修正
-15
-cssの作成
-16
-テストの実施
-18
-説明の作成
-19,20
-
-PHP BULLETIN BOARD /
-・classes/
-Board.php
-Config.php
-Database.php
-DeleteConfirm.php
-DeleteSuccess.php
-SessionManager.php
-UpdateEdit.php
-User.php
-
-・css/
-styles.css
-
-・text/
-flowchart.text
-NOTES.test
-
-board.php
-delete-confirm.php
-delete-success.php
-login.php
-logout.php
-register.php
-update-edit.php
-README.md
-
-
-
-
 PHP BULLETIN BOARD/
 ├── classes/
 │   ├── Board.php
@@ -79,6 +39,95 @@ $_GLOBALS：全てのグローバル変数を格納。
 
 
 
+
+<基本的なSQLクエリ（SQL命令文）>
+#データの取得（SELECT）
+SELECT: データベースからデータを取得するためのクエリです。
+-- 全てのデータを取得
+SELECT * FROM users;
+-- 特定の列を取得
+SELECT name, email FROM users;
+-- 条件に一致するデータを取得
+SELECT * FROM users WHERE age > 18;
+-- データを並び替えて取得
+SELECT * FROM users ORDER BY name ASC;
+-- データの一部だけ取得
+SELECT * FROM users LIMIT 10;
+
+#データの挿入（INSERT INTO）
+INSERT INTO: テーブルに新しいデータを挿入するためのクエリです。
+-- 新しいデータをテーブルに挿入
+INSERT INTO users (name, email, age) VALUES ('John Doe', 'john@example.com', 25);
+
+#データの更新（UPDATE）
+UPDATE: テーブル内の既存データを更新するためのクエリです。
+-- 特定のデータを更新
+UPDATE users SET email = 'john.new@example.com' WHERE name = 'John Doe';
+-- 全ての行を更新
+UPDATE users SET status = 'active';
+
+#データの削除（DELETE）
+DELETE: テーブルからデータを削除するためのクエリです。
+-- 特定の行を削除
+DELETE FROM users WHERE name = 'John Doe';
+-- テーブルの全データを削除
+DELETE FROM users;
+
+#テーブルの作成（CREATE TABLE）
+CREATE TABLE: 新しいテーブルを作成するためのクエリです。
+-- 新しいテーブルを作成
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    age INT
+);
+
+#テーブルの変更（ALTER TABLE）
+ALTER TABLE: 既存のテーブルの構造を変更するためのクエリです。
+-- テーブルに新しい列を追加
+ALTER TABLE users ADD COLUMN status VARCHAR(50);
+-- テーブルの列のデータ型を変更
+ALTER TABLE users MODIFY COLUMN age TINYINT;
+-- テーブルの列を削除
+ALTER TABLE users DROP COLUMN status;
+
+#テーブルの削除（DROP TABLE）
+DROP TABLE: テーブルを削除するためのクエリです。
+-- テーブルを削除
+DROP TABLE users;
+
+#データの集計（COUNT, SUM, AVG, MAX, MIN）
+集計関数: データを集計するための関数を使用したクエリです。
+-- 行数を数える
+SELECT COUNT(*) FROM users;
+-- 特定の列の合計を計算
+SELECT SUM(salary) FROM employees;
+-- 特定の列の平均値を計算
+SELECT AVG(age) FROM users;
+-- 最大値を取得
+SELECT MAX(age) FROM users;
+-- 最小値を取得
+SELECT MIN(age) FROM users;
+
+#データのグループ化（GROUP BY）
+GROUP BY: データを特定の列でグループ化して集計するクエリです。
+-- 各年齢ごとのユーザー数を取得
+SELECT age, COUNT(*) FROM users GROUP BY age;
+-- 各部門ごとの平均給与を取得
+SELECT department, AVG(salary) FROM employees GROUP BY department;
+
+#データの結合（JOIN）
+JOIN: 複数のテーブルを結合してデータを取得するクエリです。
+-- 2つのテーブルを結合してデータを取得
+SELECT users.name, orders.amount FROM users
+INNER JOIN orders ON users.id = orders.user_id;
+-- 外部結合（LEFT JOIN）
+SELECT users.name, orders.amount FROM users
+LEFT JOIN orders ON users.id = orders.user_id;
+
+
+<>
 
 
 

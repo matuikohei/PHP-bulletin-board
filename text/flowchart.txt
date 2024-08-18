@@ -431,24 +431,33 @@ public function __construct()
 上記のコードで、Database.phpのpdoの中にPDOオブジェクトを格納している。
 
 <tryブロック>
+try {
+    $this->pdo = new PDO($dsn, $username, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
+}
+
+#例え
 あなたがホテルにチェックインしようとしているとします。チェックインカウンターに行って、部屋の予約確認をしますね。この部分が「tryブロック」に相当します。「試してみる」段階です。
+#PDOインスタンスの作成
 new PDO($dsn, $username, $password, [...]) は、データベースに接続するための新しい「鍵」を作る作業。鍵（PDOオブジェクト）を使ってデータベース（ホテルの部屋）にアクセスできるようにする。
-PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION: これは、「部屋がない」とか「予約が見つからない」（データーベースがない）といったエラーが発生したときに、すぐにスタッフ（PDO）に知らせる設定。
-PDO::ATTR_EMULATE_PREPARES => false: これは、ホテルのスタッフ（PDO）が正確に予約内容を確認するようにするための設定。
+#オプション設定
+・PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION: これは、「部屋がない」とか「予約が見つからない」（データーベースがない）といったエラーが発生したときに、すぐにスタッフ（PDO）に知らせる設定。
+・PDO::ATTR_EMULATE_PREPARES => false: これは、ホテルのスタッフ（PDO）が正確に予約内容を確認するようにするための設定。
 
 <catchブロック>
 catch (PDOException $e) {
     echo '接続失敗: ' . $e->getMessage();
     exit();
 }
-
+#例え
 チェックインを試みたけど、予約が見つからなかった場合どうしますか？カウンターで「予約が見つかりません」と伝えられるでしょう。この部分が「catchブロック」に相当します。
 
-catch (PDOException $e): これは、もしチェックインがうまくいかなかったら（例: 予約が見つからなかったら）、エラーメッセージをキャッチして処理します。
-
-echo '接続失敗: ' . $e->getMessage();: ここでは、エラーメッセージを表示します。「接続失敗: 〇〇」という形で、何が問題だったかを教えてくれます。
-
-exit();: そして、そこで処理を終了します。これ以上進めることができないためです。
+#エラー処理
+・catch (PDOException $e): これは、もしチェックインがうまくいかなかったら（例: 予約が見つからなかったら）、エラーメッセージをキャッチして処理します。
+・echo '接続失敗: ' . $e->getMessage();: ここでは、エラーメッセージを表示します。「接続失敗: 〇〇」という形で、何が問題だったかを教えてくれます。
+・exit();: そして、そこで処理を終了します。これ以上進めることができないためです。
 
     |
     +--> [成功: PDOオブジェクトを生成して保持]
@@ -562,8 +571,475 @@ exit();: そして、そこで処理を終了します。これ以上進める�
            |
         [完了]
 
+<insertPostメソッド>
+# 呼び出しもと
+呼び出しもとは、Boardクラス。タイトル、コメントが入力されており、画像アップロードに成功していればinsertPostメソッドを使って、投稿をデータベースに保存
+
+if ($_SESSION['title'] != '' && $_SESSION['comment'] != '' && $imagePath !== false) {
+    $title = $_SESSION['title'];
+    $comment = $_SESSION['comment'];
+    $userId = $_SESSION['user_id'];  // ログインユーザーIDを取得
+    $this->db->insertPost($title, $comment, $userId, $imagePath);
+    unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
+}
 
 
+# データの準備：箱にデータを入れる
+public function insertPost($title, $comment, $user_id, $imagePath)
+
+-説明
+この部分は、insertPostメソッドの宣言です。ここで、$title、$comment、$user_id、$imagePathという4つのデータを引数として受け取ります。これらのデータは、後でデータベースに送るために使います。このデータが、例え話の「貴重なデータ」であり、これから箱に詰めるものです。
+
+-例え：
+あなたがいくつかのデータ（タイトル、コメント、ユーザーID、画像パス）を持っているとしましょう。それぞれのデータは、貴重なもので、正確に安全に届ける必要があります。このデータを、安全な「箱」に入れて送ることにします。
+
+
+# SQL文を準備（SQLステートメント、SQLへの命令文、プレースホルダーの準備）：箱のラベルを作る
+$stmt = $this->pdo->prepare('INSERT INTO board_info (title, comment, user_id, image_path) VALUES (:title, :comment, :user_id, :image_path)');
+
+-説明
+この行では、データベースに送るためのSQL文を準備しています。prepareメソッドを使って、SQL文の「テンプレート」を作ります。VALUES (:title, :comment, :user_id, :image_path)の部分が、箱のラベルにあたります。ここでは具体的なデータはまだ入っておらず、どのデータがどこに入るかを示す「プレースホルダ」と呼ばれるものが使われています。
+$stmtという変数名は、ステートメントを意味しています。ステートメントとは命令文のことです。
+prepareメソッドは、プレースホルダーを準備するためのメソッド。
+
+-例え：
+次に、データを送るための「箱」のラベルを作ります。このラベルには、何が入っているのかが書かれていますが、まだ具体的なデータは書かれていません。例えば、「タイトルを入れる場所」「コメントを入れる場所」などと書かれています。このラベルがSQL文のテンプレートに相当します。
+
+
+# データを箱に詰める：プレースホルダにデータを入れる
+$stmt->bindValue(':title', $title, PDO::PARAM_STR);
+$stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
+$stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->bindValue(':image_path', $imagePath, PDO::PARAM_STR);
+
+-説明
+この部分では、受け取ったデータをSQL文のプレースホルダに詰めています。bindValueメソッドを使って、$title、$comment、$user_id、$imagePathのデータをそれぞれ:title、:comment、:user_id、:image_pathというプレースホルダに代入しています。これが、データを箱の中の指定された場所に詰める作業にあたります。
+bindValueメソッドは、SQL文に含まれるプレースホルダー（:で始まる部分）に実際のデータを結びつけるためのメソッドです。この結びつける操作を「バインド」と言います。
+
+-例え
+次に、準備したラベルに従って、各データを箱の中の適切な場所に詰めます。具体的には、「タイトル」を「タイトル用の場所」に、「コメント」を「コメント用の場所」に入れていきます。このプロセスが、SQL文のプレースホルダにデータを代入する作業にあたります。
+
+
+#安全に箱を閉じる：SQLインジェクション対策
+-説明
+ここで重要なのは、bindValueを使うことで、データが適切に保護されている点です。プレースホルダを使うことで、SQLインジェクション攻撃からデータを守ることができます。これが、箱をしっかり閉じて、安全に保つという部分にあたります。
+
+-例え
+この箱にはしっかりと蓋がされており、外部から箱の中身に触れられないようになっています。これがSQLインジェクション対策に相当します。箱がしっかりと閉じられていることで、データが改ざんされたり、悪意のあるコードが紛れ込んだりすることを防ぎます。
+
+
+# 箱をデータベースに送る：SQL文の実行
+$stmt->execute();
+
+-説明
+最後に、executeメソッドを使って、準備が整ったSQL文を実行します。これにより、データベースに箱を送り、その中のデータがデータベースに保存されます。データベース側では、送られてきたデータを適切な場所に保存する処理が行われます。
+executeメソッドは、prepareとbindValueで準備したSQL文を実際にデータベースに送って、処理を実行するためのメソッドです。
+
+-例え
+最後に、この安全な箱をデータベースに送ります。データベースは、この箱を受け取り、ラベルを見て、中に入っているデータを正しい場所に保存します。これがSQL文を実行して、データベースにデータを保存するプロセスです。
+
+
+<fetchAllPostsメソッド 今は使っていない>
+まず、このコードはPHPでデータベースから投稿情報を取得するためのメソッド（関数）です。
+
+# データベースクエリの準備
+$stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC');
+
+-説明
+この行は、データベースに対してSQLクエリ（命令）を準備する部分です。
+$this->pdo: これは、PDO（PHP Data Objects）というPHPのデータベースアクセスクラスのインスタンスです。このインスタンスを使ってデータベースに接続し、操作を行います。
+prepareメソッドは、プレースホルダーを準備するためのメソッド。
+SELECT *: SQLの命令で、「すべての列を選択する」という意味です。
+FROM board_info: board_info という名前のテーブルからデータを取得します。
+ORDER BY id DESC: id という列を基準にして、データを降順（大きい順）に並べ替えて取得します。
+
+-例え
+これは、書店のカウンターで「棚にある本をすべて持ってきて、IDが大きい順に並べてください」と注文しているようなものです。
+
+# クエリの実行
+$stmt->execute();
+
+-説明
+この行は、準備したSQLクエリをデータベースに送信して実行する部分です。
+execute() メソッドを呼び出すことで、データベースが指示に従ってデータを取得します。
+
+-例え
+先ほどの書店の例で言うと、店員が注文票を見て、実際に棚から本を取り出す作業を開始するようなものです。
+
+# 結果の取得と返却
+return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+-説明
+この部分は、データベースから取得した結果を配列の形で取得し、そのまま呼び出し元に返す部分です。
+fetchAll() メソッドは、クエリの結果をすべて取得し、配列として返します。
+PDO::FETCH_ASSOC:。このオプションは、データを連想配列の形式で取得することを意味します。連想配列とは、キー（列名）と値（データ）がペアになった配列です。
+
+-具体的にどのような形で帰ってくるか
+[
+    [
+        "id" => 1,
+        "title" => "掲示板の初投稿",
+        "comment" => "これは初めての投稿です。",
+        "user_id" => 101,
+        "image_path" => "uploads/image1.jpg",
+        "created_at" => "2024-08-01 12:34:56",
+        "updated_at" => "2024-08-01 13:00:00"
+    ],
+    [
+        "id" => 2,
+        "title" => "PHPについて",
+        "comment" => "PHPの質問です。",
+        "user_id" => 102,
+        "image_path" => "uploads/image2.jpg",
+        "created_at" => "2024-08-02 14:20:00",
+        "updated_at" => "2024-08-02 15:00:00"
+    ],
+    // さらに多くの投稿データが続く
+]
+
+-例え
+これは、取り出した本の一覧をタイトルや著者名などの情報を含めたリストに整理し、それを注文した人に渡すような作業です。
+
+
+
+<searchPostsメソッド>
+public function fetchPostsByPage($page, $limit)
+    {
+        $offset = ($page - 1) * $limit;
+        $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+#処理の流れ
+board.php → Board.php searchPostsメソッド → Database.php searchPostsメソッド
+
+#メソッドの役割
+この searchPosts メソッドは、掲示板アプリケーション内で、ユーザーが入力したキーワードに基づいて投稿を検索し、その検索結果をページごとに表示するための機能を提供します。
+
+#メソッド宣言部分
+public function searchPosts($keyword, $page, $limit)
+
+-説明
+$keyword:
+ユーザーが検索ボックスに入力したキーワード。これを基に、タイトルやコメントの中から一致する投稿を検索します。
+$page:
+現在表示するページ番号。ページネーション（複数ページに分割して表示）を実現するために使います。
+$limit:
+1ページに表示する投稿の数。例えば、1ページに10件表示する場合、この値は10になります。
+
+#オフセットの計算
+$offset = ($page - 1) * $limit;
+
+-説明
+このコードは、データベースからデータを取得するときに、「どこからデータを取り始めるか」を計算しています。具体的には、ページネーションと呼ばれる機能を実現するために使われます。このコードは、データベースからどの位置からデータを取り始めるかを決めるために使われます。ページネーションを実現するために、特定のページに表示するデータのスタート位置を計算しています。
+
+-具体例
+1ページ目:
+$page = 1 のとき、$offset は (1 - 1) * 10 = 0 です。つまり、最初のデータから表示を始めます。
+2ページ目:
+$page = 2 のとき、$offset は (2 - 1) * 10 = 10 です。つまり、11番目のデータから表示を始めます。
+3ページ目:
+$page = 3 のとき、$offset は (3 - 1) * 10 = 20 です。つまり、21番目のデータから表示を始めます。
+
+#SQLクエリの準備
+$stmt = $this->pdo->prepare(
+    'SELECT * FROM board_info
+     WHERE title LIKE :keyword1 OR comment LIKE :keyword2
+     ORDER BY id DESC
+     LIMIT :limit OFFSET :offset'
+);
+
+#SQLクエリ:
+•SELECT * FROM board_info: board_info テーブルからすべての列（データ）を選択するという意味です。
+•WHERE title LIKE :keyword1 OR comment LIKE :keyword2: ここでは、投稿のタイトルまたはコメントがキーワードと一致するものを検索しています。LIKE は部分一致検索を行うための条件です。
+•ORDER BY id DESC: 検索結果を投稿IDの降順（新しいものが上）で並べ替えます。
+•LIMIT :limit OFFSET :offset: 取得する投稿の数を制限し、どこから取得を始めるかを指定します。これにより、ページごとに投稿を表示できます。
+
+#SQLクエリとCRUD操作の対応
+-Create（作成）:
+•SQLクエリ: INSERT INTO を使います。
+•例: INSERT INTO users (username, password) VALUES ('john_doe', 'secret');
+-Read（読み取り）:
+•SQLクエリ: SELECT を使います。
+•例: SELECT * FROM users WHERE username = 'john_doe';
+-Update（更新）:
+•SQLクエリ: UPDATE を使います。
+•例: UPDATE users SET password = 'new_secret' WHERE username = 'john_doe';
+-Delete（削除）:
+•SQLクエリ: DELETE を使います。
+•例: DELETE FROM users WHERE username = 'john_doe';
+
+#結果の取得
+return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+-説明
+•クエリの実行結果をすべて取得し、連想配列として返します。
+•fetchAll() メソッドは、クエリの結果をすべて取得し、配列として返します。
+•PDO::FETCH_ASSOC: これは、結果を連想配列の形式で取得することを意味します。連想配列とは、キー（列名）と値（データ）がペアになった形式です。
+
+
+<countSearchResultsメソッド>
+public function countSearchResults($keyword)
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM board_info WHERE title LIKE :keyword1 OR comment LIKE :keyword2');
+        $stmt->bindValue(':keyword1', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+#処理の流れ
+board.php（ページネーションの総ページ数の表示に使用） → Board.php countSearchResultsメソッド → Database.php countSearchResultsメソッド
+
+#SQLクエリの準備
+$stmt = $this->pdo->prepare('SELECT COUNT(*) FROM board_info WHERE title LIKE :keyword1 OR comment LIKE :keyword2');
+
+-説明
+•ここでは、データベースに対して実行するSQLクエリを準備しています。
+•SQL文の意味:
+SELECT COUNT(*): これは、条件に一致する行（データ）がいくつあるかを数えるためのSQL文です。
+FROM board_info: board_info というテーブルからデータを取得します。このテーブルには掲示板の投稿が保存されています。
+WHERE title LIKE :keyword1 OR comment LIKE :keyword2: ここで、投稿のタイトルまたはコメントに、ユーザーが入力したキーワードが含まれているかどうかを調べます。
+
+#戻り値
+return $stmt->fetchColumn();
+
+-fetchColumn メソッド:
+fetchColumn は、クエリの結果から最初の列の値を取得するためのメソッドです。この場合は、COUNT(*) の結果（つまり、キーワードに一致する投稿の数）が返されます。
+
+
+
+<fetchPostsByPageメソッド>
+#処理の流れ
+board.php $post_list → Board.php getPostメソッド → Database.php fetchPostsByPageメソッド
+
+public function fetchPostsByPage($page, $limit)
+    {
+        $offset = ($page - 1) * $limit;
+        $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+#メソッドの概要
+public function fetchPostsByPage($page, $limit)
+-説明
+・$page:
+現在表示したいページ番号を指定します。たとえば、1ページ目、2ページ目など。
+・$limit:
+1ページに表示する投稿の数を指定します。たとえば、1ページに10件の投稿を表示する場合、この値は10になります。
+
+#オフセットの計算
+$offset = ($page - 1) * $limit;
+
+-$page - 1をする理由
+$offset = ($page - 1) * $limit; という計算において、$page から1を引くのは、ページネーションの仕組みを正しく動作させるためです。
+
+-ページネーションの基本
+ページネーションとは、データを複数のページに分けて表示する機能です。たとえば、1ページに10件のデータを表示する場合、次のようになります。
+•	1ページ目: 1件目から10件目まで
+•	2ページ目: 11件目から20件目まで
+•	3ページ目: 21件目から30件目まで
+
+-オフセットとは
+オフセット（$offset）は、データベースからデータを取得するときに、「何件目から取得を始めるか」を指定するためのものです。
+
+-($page - 1) の意味
+
+$page は現在のページ番号を示しますが、データを取得するときのオフセットを計算する際には、$page から1を引いて計算する必要があります。
+
+-理由
+•1ページ目の場合: $page が1なので、($page - 1) * $limit は (1 - 1) * $limit となり、0 になります。つまり、データベースから最初のデータ（1件目）から取得を開始します。
+•2ページ目の場合: $page が2なので、($page - 1) * $limit は (2 - 1) * $limit となり、$limit そのものがオフセットになります。たとえば、$limit が10なら、オフセットは10です。これは、データベースから11件目からデータを取得することを意味します。
+
+-具体例
+たとえば、1ページに10件のデータを表示する場合を考えます。
+•1ページ目:
+•$page = 1
+•オフセット: ($page - 1) * $limit = (1 - 1) * 10 = 0
+•0番目（1件目）からデータを取得
+
+•2ページ目:
+•$page = 2
+•オフセット: ($page - 1) * $limit = (2 - 1) * 10 = 10
+•10番目（11件目）からデータを取得
+
+•3ページ目:
+•$page = 3
+•オフセット: ($page - 1) * $limit = (3 - 1) * 10 = 20
+•20番目（21件目）からデータを取得
+
+-まとめ
+•($page - 1) で1を引くのは、データ取得の開始位置（オフセット）を正しく計算するためです。
+•1ページ目の場合はオフセットが 0 になり、最初のデータから取得を開始します。2ページ目以降では、前のページに表示したデータ数分だけオフセットを設定し、その次のデータから取得を始めます。
+
+この計算により、ページネーションが正しく機能し、ユーザーが見るページに適切なデータが表示されるようになります。
+
+#SQLクエリの準備
+$stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
+このコードでは、board_infoの何件目の情報（offset）から、何件分（limit）の情報を持ってくるのかを決めている
+
+-説明
+•ORDER BY id DESC:
+id を基準に投稿を降順（つまり、新しいものが最初に来る順）で並べ替えます。
+•LIMIT :limit:
+取得するデータの最大件数を指定します。例えば、LIMIT 10 とバインドされた場合、10件のデータを取得します。
+•OFFSET :offset:
+データの取得を開始する位置を指定します。例えば、OFFSET 0 とバインドされた場合、最初のデータ（最新のデータ）から取得します。
+
+#プレースホルダーへの値のバインド
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+-説明
+prepareメソッドで、箱のラベルを作って、どの情報（命令文）をどこの箱に入れるか決めておいたものを、bindValueで、どこに入れるか決めておいた箱に情報（命令文）を入れて、executeメソッドでその情報が入った箱をデーターベースへ送る
+
+#結果の取得
+return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+-説明
+•fetchAll(PDO::FETCH_ASSOC):
+この部分では、データベースから返ってきた「箱」の中身を取り出す作業を行っています。
+fetchAll() は、返ってきたすべてのデータを取得するためのメソッドです。これは、「箱の中に入っているすべてのデータを取り出してください」という命令に相当します。
+
+
+<countAllPostsメソッド>
+public function countAllPosts()
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM board_info');
+        return $stmt->fetchColumn();
+    }
+
+#メソッドの概要
+public function countAllPosts()
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM board_info');
+        return $stmt->fetchColumn();
+    }
+この countAllPosts メソッドは、掲示板などのアプリケーションで「すべての投稿がいくつあるのか」を数えて、その数を返します。
+
+#処理の流れ
+board.php $total_posts変数 getTotalPostCountメソッド呼び出し → Board.php getTotalPostCountメソッド → Database.phpのcountAllPostsメソッドの呼び出し
+
+#SQLクエリ
+$stmt = $this->pdo->query('SELECT COUNT(*) FROM board_info');
+-説明
+行数を数えるだけで、データー改竄の恐れがなく、SQLインジェクション対策を行う必要がないためprepareではなく、queryを使用している
+
+#結果の取得
+return $stmt->fetchColumn();
+-説明
+fetchColumn() は、クエリの結果の最初の列を取得するメソッドです。この場合、COUNT(*) の結果、つまり投稿の総数を取得します。
+
+
+<getImagePathメソッド>
+public function getImagePath($post_id)
+{
+    $stmt = $this->pdo->prepare('SELECT image_path FROM board_info WHERE id = :id');
+    $stmt->bindValue(':id', $post_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+#処理の流れ
+DeleteConfirmクラスのhandleRequestメソッド → handleRequestメソッドでDatabaseクラスのdeletePostメソッドの呼び出し → deletePostメソッドでgetImagePathメソッドを呼び出し
+
+#メソッドの概要
+このメソッドは、掲示板アプリケーションの中で、投稿ID（post_id）を使って、その投稿に関連する画像のファイルパスをデータベースから取得し、そのパスを返します。つまり、「特定の投稿に紐づいた画像の場所」を探し出すためのものです。
+
+#メソッドの定義
+public function getImagePath($post_id)
+-説明
+これは、getImagePath という名前のメソッドを定義しています。このメソッドは、投稿のID（$post_id）を受け取り、そのIDに関連する画像のパスをデータベースから取得します。
+-例え
+これは、図書館で「特定の本（投稿）に付いているラベル（画像のパス）を見つける」作業を行うようなものです。
+
+#SQLクエリ
+$stmt = $this->pdo->prepare('SELECT image_path FROM board_info WHERE id = :id');
+-説明
+この部分では、データベースに対して「board_info というテーブルから、特定の投稿ID（id）に対応する画像のパス（image_path）を取得して欲しい」という命令を準備しています。
+-例え
+これは、図書館員に「特定の本のラベル（画像のパス）を探して欲しい」とお願いしているようなものです。
+
+#結果の取得
+return $stmt->fetchColumn();
+-説明
+fetchColumn() メソッドは、クエリの結果から最初の列（この場合は image_path）を取得します。
+
+
+<deletePostメソッド>
+public function deletePost($post_id)
+    {
+        $imagePath = $this->getImagePath($post_id);
+        if (!empty($imagePath) && file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
+        $stmt = $this->pdo->prepare('DELETE FROM board_info WHERE id = :id');
+        $stmt->bindValue(':id', $post_id, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+#処理の流れ
+DeleteConfirmクラスのhandleRequestメソッド → handleRequestメソッドでDatabaseクラスのdeletePostメソッドの呼び出し
+
+#メソッドの概要
+このメソッド deletePost は、特定の投稿ID（$post_id）を使って、その投稿に関連するデータと画像を削除します。具体的には、投稿に紐づいた画像ファイルをサーバーから削除し、その後にデータベースから投稿のデータを削除します。
+
+#画像パスの取得
+$imagePath = $this->getImagePath($post_id);
+-説明
+ここでは、投稿IDを使って、その投稿に関連する画像ファイルのパスを取得しています。この getImagePathメソッドで、特定の投稿IDに対応する画像の場所をデータベースから探し出します。
+
+#画像ファイルの削除チェック
+if (!empty($imagePath) && file_exists($imagePath)) {
+    unlink($imagePath);
+}
+-説明:
+ここでは、画像ファイルのパスが空でないか（!empty($imagePath)）を確認し、そのファイルがサーバー上に実際に存在するか（file_exists($imagePath)）を確認しています。もし存在しているなら、その画像ファイルを削除します（unlink($imagePath)）。
+empty は、変数が「空」であるかどうかを調べるためのPHPの構文です。具体的には、変数が次のいずれかの状態にある場合に true を返します。
+file_exists は、指定されたパスにファイルやディレクトリが存在するかどうかを確認するためのPHPの組み込み関数です。
+
+#画像ファイルの削除
+unlink($imagePath);
+-説明
+unlink は、指定されたファイルをサーバーから削除するためのPHP組み込み関数です。実際にファイルを削除する操作を行います。
+
+#投稿データの削除
+$stmt = $this->pdo->prepare('DELETE FROM board_info WHERE id = :id');
+$stmt->bindValue(':id', $post_id, PDO::PARAM_INT);
+$stmt->execute();
+-説明:
+ここでは、データベースから指定された投稿IDに対応する投稿データを削除します。まず、DELETE FROM board_info WHERE id = :id というSQL文を準備し（prepare）、次にそのIDに値をバインド（bindValue）します。最後に、このSQL文を実行して投稿データを削除します（execute）。
+
+
+<updatePostメソッド>
+public function updatePost($id, $title, $comment, $imagePath)
+    {
+        $stmt = $this->pdo->prepare('UPDATE board_info SET title = :title, comment = :comment, image_path = :image_path WHERE id = :id');
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':title', $title, PDO::PARAM_STR);
+        $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
+        $stmt->bindValue(':image_path', $imagePath, PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+#処理の流れ
+
+#メソッドの概要
+updatePost メソッドは、指定された投稿IDに基づいて、その投稿のタイトル、コメント、そして画像パスを新しい値に更新します。データベースの board_info テーブルの特定のレコード（行）を更新するために使用されます。
+
+#
+
+#
+
+#
+
+#
 
 
 
