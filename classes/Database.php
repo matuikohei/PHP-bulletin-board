@@ -112,15 +112,6 @@ class Database
         $stmt->execute();
     }
 
-    // 追加: ユーザーをデータベースに保存するメソッド 削除予定のメソッド
-    // public function insertUser($username, $password)
-    // {
-    //     $stmt = $this->pdo->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
-    //     $stmt->bindValue(':username', $username, PDO::PARAM_STR);
-    //     $stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT), PDO::PARAM_STR);
-    //     $stmt->execute();
-    // }
-
     // 追加: ユーザー情報を取得するメソッド
     // public function getUserByUsername($username)
     // {
