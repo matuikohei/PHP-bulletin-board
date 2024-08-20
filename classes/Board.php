@@ -77,17 +77,13 @@ class Board
     {
         // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
-            // アップロードされた画像を保存するディレクトリを指定
+
             $uploadDir = 'uploads/';
-            // 保存先のファイルパスを生成（ディレクトリ + ファイル名）
             $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
 
-            // アップロードされた画像ファイルを指定したディレクトリに移動
             if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
-                // 移動に成功した場合、保存先のファイルパスを返す
                 return $uploadFile;
             } else {
-                // 画像の移動に失敗した場合、エラーメッセージを設定し、falseを返す
                 $this->err_msg_image = '画像のアップロードに失敗しました';
                 return false;
             }
