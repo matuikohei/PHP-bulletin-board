@@ -1033,6 +1033,7 @@ Board.phpのdeletePostがDatabase.php の deletePost メソッドを呼び出す
 
 
 
+
 <SessionManager.php フローチャート>
 [セッション開始を確認 (startSession)]
     |
@@ -1230,15 +1231,99 @@ public function startSession()
 }
 
 #セッションの開始:
- •session_status(): 現在のセッションの状態を取得します。PHP_SESSION_NONEはセッションがまだ開始されていないことを意味します。
- •ini_set('session.gc_maxlifetime', 1800): セッションが有効な最大時間を設定します。この例では1800秒（30分）です。
+ •session_status()
+session_status()はPHPの組み込み関数です。session_status()関数は、現在のセッションの状態を返します。この関数を使用すると、セッションがまだ開始されていない (PHP_SESSION_NONE)、既に開始されている (PHP_SESSION_ACTIVE)、またはセッションが無効 (PHP_SESSION_DISABLED) のいずれかを確認できます。
+ •ini_set('session.gc_maxlifetime', 1800)
+ini_set は、PHPの設定をプログラムの実行中に変更するための関数です。普段は設定ファイル（php.ini）で管理されている設定を、一時的に変更したいときに使います。
+ •ini_set の使い方
+ini_set('設定項目', '設定値');
+今回のコードでは、セッションの有効期限を30分に設定したいので、上記のような記述になっている
  •session_start(): 新しいセッションを開始します。
+
 #セッションの有効期限確認:
- •isSessionExpired(): セッションが有効期限を超えているかを確認するメソッドです。有効期限を超えている場合、セッションを破棄し、新しいセッションを開始します。
+ •isSessionExpired()
+isSessionExpired() は、PHPでセッションの有効期限が切れているかどうかを確認するメソッドです。このメソッドは、ユーザーがセッションを開始してから一定の時間が経過したかどうかを判断し、セッションが有効期限内であるかどうかをチェックするメソッドです。
+
 #セッションIDの再生成:
- •session_regenerate_id(true): セッションIDを再生成します。これにより、セッション固定攻撃（session fixation）を防ぐことができます。
+ •session_regenerate_id(true)
+session_regenerate_id(true); は、セッションIDを再生成し、セッションデータの安全性を高めるために非常に重要なセキュリティ対策です。初心者の方にも理解しやすいように言うと、「現在のセッションを守るために、定期的に新しい鍵（ID）を作り直す」ことです。
+このコードは、セッションIDを再生成します。session_regenerate_id(true); というコードは、現在のセッションIDを新しいものに再生成し、セッションハイジャック（不正アクセス）などのセキュリティリスクを防ぐために使われます。
+
+#session_regenerate_id(true); の意味と役割
+-セッションIDの再生成:
+ •セッションIDは、ユーザーを一意に識別するために使われる識別子です。PHPでは、ユーザーがサイトにアクセスするたびにこのセッションIDが生成されます。
+ •session_regenerate_id() を呼び出すと、新しいセッションIDが生成されます。これにより、古いセッションIDが無効化され、セッションIDを使った攻撃を防ぐことができます。
+-true パラメータの意味
+ •session_regenerate_id() の引数に true を渡すと、古いセッションデータが削除されます。
+ •もし false を渡すと、古いセッションデータは保持されたまま、新しいセッションIDだけが生成されます。しかし、セキュリティの観点からは true を使うことが推奨されます。
+
 #最終アクティビティ時間の更新:
  •$_SESSION['LAST_ACTIVITY'] = time();: ユーザーが最後にアクティブだった時間をセッションに記録します。
+
+
+<isSessionExpired() メソッド>
+private function isSessionExpired()
+{
+    if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 1800)) {
+        return true;
+    }
+    return false;
+}
+#セッションの有効期限確認:
+ •isset($_SESSION['LAST_ACTIVITY']): 最後にアクティブだった時間がセッションに記録されているか確認します。
+ •time() - $_SESSION['LAST_ACTIVITY'] > 1800: 現在の時間と最後のアクティビティ時間との差が1800秒（30分）を超えているか確認します。超えている場合はtrueを返し、セッションが有効期限を超えていることを示します。
+
+
+<setToken() メソッド>
+public function setToken()
+{
+    $token = sha1(uniqid(mt_rand(), true));
+    $_SESSION['board_token'] = $token;
+    return $token;
+}
+
+#CSRFトークンの生成:
+ •sha1(uniqid(mt_rand(), true)): CSRF（Cross-Site Request Forgery）攻撃を防ぐために、ランダムな文字列を生成し、ハッシュ化します。このトークンは一意で、予測不可能です。
+ •$_SESSION['board_token']: 生成したトークンをセッションに保存します。
+
+
+<validateToken() メソッド>
+public function validateToken($token)
+{
+    if (empty($_SESSION['board_token']) || ($_SESSION['board_token'] !== $token)) {
+        exit('不正な投稿です');
+    }
+    unset($_SESSION['board_token']);
+    unset($_POST['board_token']);
+}
+
+#CSRFトークンの検証:
+ •empty($_SESSION['board_token']): セッションに保存されたトークンが存在するか確認します。
+ •$_SESSION['board_token'] !== $token: セッションに保存されたトークンと、フォームから送信されたトークンが一致するか確認します。一致しない場合、処理を終了し「不正な投稿です」というメッセージを表示します。
+
+
+<isLoggedIn() メソッド>
+public function isLoggedIn()
+{
+    return isset($_SESSION['user_id']);
+}
+
+#ログイン状態の確認:
+ •isset($_SESSION['user_id']): ユーザーがログインしているかを確認します。セッションにuser_idが設定されていれば、ログインしているとみなされます。
+
+
+<logoutUser() メソッド>
+public function logoutUser()
+{
+    session_unset();
+    session_destroy();
+}
+#ログアウト処理:
+ •session_unset(): 現在のセッション変数をすべて解除します。
+ •session_destroy(): セッション自体を破棄します。これにより、ユーザーはログアウト状態になります。
+
+
+
 
 
 
