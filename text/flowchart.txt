@@ -49,6 +49,518 @@ HTMLの生成と表示
 
 
 
+
+<Board.phpフローチャート>
+
+<construct>
+public function __construct()
+    {
+        // セッション管理クラスとデータベースクラスのインスタンスを作成
+        $this->sessionManager = new SessionManager();
+        $this->db = new Database();
+
+        // セッションを開始
+        $this->sessionManager->startSession();
+
+        // ユーザーがログインしているか確認し、ログインしていない場合はログインページにリダイレクト
+        if (!$this->sessionManager->isLoggedIn()) {
+            header('Location: login.php'); // ログインしていない場合はログインページにリダイレクト
+            exit();
+        }
+    }
+
+#public function __construct()
+	•説明: クラスがインスタンス化される（新しいオブジェクトが作られる）ときに、このメソッドが自動的に実行されます。
+
+#$this->sessionManager = new SessionManager();
+	-説明:
+	    •$this->sessionManager は、このクラス内で sessionManager というプロパティ（クラス内の変数）を指します。$this は、現在のオブジェクト自身を指すキーワードです。
+	    •new SessionManager() は、SessionManager クラスの新しいインスタンス（オブジェクト）を作成します。このオブジェクトは、セッション管理のための機能を提供します。
+	    •この行は、SessionManager クラスのオブジェクトを作成し、それをこのクラスの sessionManager プロパティに保存します。
+
+#$this->db = new Database();
+	-説明:
+	    •$this->db は、db というプロパティを指します。
+	    •new Database() は、Database クラスの新しいインスタンスを作成します。このクラスは、データベースとのやり取りを行うためのものです。
+	    •この行は、Database クラスのオブジェクトを作成し、それをこのクラスの db プロパティに保存します。
+
+#$this->sessionManager->startSession();
+	-説明:
+	    •sessionManager プロパティ（SessionManager クラスのオブジェクト）の startSession() メソッドを呼び出して、セッションを開始します。
+	    •セッションとは、サーバーとユーザー間でやり取りされるデータを保持する仕組みです。これにより、例えばログイン状態やユーザーの設定などを維持することができます。
+
+#if (!$this->sessionManager->isLoggedIn()) {
+	-説明:
+	    •if 文 は、条件が真（true）である場合にその中のコードを実行します。ここでは、! 演算子を使って、isLoggedIn() が偽（false）の場合の処理を行います。
+	    •! 演算子 は、「not」を意味します。つまり、!$this->sessionManager->isLoggedIn() は「ユーザーがログインしていない」という意味になります。
+
+#isLoggedInメソッドでtrueが返されるケース
+    •$_SESSION['user_id'] がセットされている場合。つまり、ユーザーがログインしているとき。
+
+#isLoggedInメソッドでfalse が返されるケース
+    •$_SESSION['user_id'] がセットされていない場合。つまり、ユーザーがログインしていない、またはログアウトしたとき。
+
+#header('Location: login.php');
+    •header() 関数 は、PHPでHTTPヘッダを送信するための関数であり、これによりブラウザに特定の指示を送ることができます。
+	•リダイレクト とは、ユーザーを自動的に別のページに移動させる操作のことです。このコードでは、ユーザーを login.php ページに移動させます。
+	•使用上の注意: header() 関数は、他のコンテンツがブラウザに送信される前に使う必要があります。
+
+#header() 関数
+    -header() 関数の詳細説明
+	    •header() 関数とは何か？
+	    •header() 関数は、PHPでHTTPヘッダを送信するために使う関数です。HTTPヘッダは、WebサーバーとWebブラウザ（ユーザーが使っているブラウザ）間でやり取りされる特別な情報です。この情報には、ブラウザがどう振る舞うべきか、どのようなデータが送信されるか、などが含まれています。
+	    •HTTPヘッダって何？
+	    •HTTPヘッダは、Webページのデータそのものではなく、Webページをどのように処理するかについての情報を含んでいます。たとえば、あるページが別のページにリダイレクト（転送）されるべきかどうか、あるいはそのページがキャッシュされるべきかどうかなどの指示が含まれています。
+
+	-リダイレクトの意味:
+	    •リダイレクトとは、ユーザーが現在見ているページから自動的に別のページに移動させる処理のことです。例えば、ユーザーがログインしていない状態で特定のページにアクセスしようとした場合、そのままアクセスを許すのではなく、まずログインページに移動させる、というような使い方をします。
+
+    -header('Location: login.php'); の具体的な動作:
+	    •このコードは、PHPが「Location: login.php」という指示をHTTPヘッダとしてブラウザに送信するものです。この指示を受け取ったブラウザは、即座に現在のページから login.php ページへと移動します。
+
+
+#header() 関数の重要性
+	-順序に注意:
+	    •header() 関数は、ページの内容が出力される前に使わなければなりません。これは、HTTPヘッダはページのコンテンツ（HTMLやテキストなど）よりも先に送信される必要があるからです。もし何かを出力した後に header() を使おうとすると、エラーが発生します。
+	-リダイレクトの柔軟性:
+	    •header('Location: somepage.php'); と書けば、どんなページにでもユーザーをリダイレクトできます。これにより、ユーザーの操作や状況に応じて、適切なページに自動的に移動させることができます。
+
+#exit();
+	•説明:
+	•exit() 関数は、スクリプトの実行を即座に終了します。これにより、header() でリダイレクトした後の処理が行われないようにします。
+
+#constructコードの流れ
+	1.クラスが作成されると、__construct() メソッドが自動的に呼び出される。
+	2.SessionManager クラスと Database クラスのオブジェクトが作成され、それぞれのプロパティに保存される。
+	3.セッションが開始される。
+	4.ユーザーがログインしているか確認され、ログインしていない場合はログインページにリダイレクトされる。
+    このように、コードはまず初期設定を行い、ユーザーがログインしていなければログインページに移動させる仕組みになっています。
+
+
+
+
+<Board.php フローチャート>
+[開始]
+    |
+    v
+[Boardクラスのインスタンス作成]
+board.phpでインスタンスを作成する
+    |
+    v
+[__construct()メソッド呼び出し]
+board.phpでインスタンスが生成されると自動でconstructが呼び出される
+    |
+    v
+[SessionManagerインスタンス作成] ---> [セッション開始 (startSession())]
+セッションは、サーバー側でユーザーごとのデータを一時的に保持するため箱
+    |
+    v
+[Databaseインスタンス作成]
+    |
+    v
+[ログイン状態を確認 isLoggedIn()メソッドの呼び出し]
+isLoggedInメソッドは、SessionManager.phpにある
+    |
+    v
+[ログイン済みか？] --------> [未ログイン] -------> [ログインページにリダイレクト] ---> [終了]
+if (!$this->sessionManager->isLoggedIn()) は、isLoggedIn メソッドを使ってユーザーがログインしているかどうかを確認。! は否定演算子で、isLoggedIn() が false を返す（ログインしていない）場合に if 文の内部が実行。
+header('Location: login.php'); は、ユーザーがログインしていない場合に、ブラウザを login.php ページにリダイレクトする。
+exit(); は、スクリプトの実行をここで終了させる。これにより、未ログインのユーザーが続行することを防ぐ。
+    |
+    v
+[ログイン済み]
+    |
+    v
+[handlePostRequest()メソッド呼び出し]
+    |
+    v
+[POSTリクエストか？（投稿ボタンが押されたか）] --------> [POSTリクエストでない] ---> [終了]
+    |
+    v
+[POSTリクエスト]
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+$_SERVERという箱の中に入っている、['REQUEST_METHOD']という情報が、POSTであるか確認している。
+    |
+    v
+[CSRFトークンを検証 (validateToken())]
+どのタイミングでトークンが生成されるのか？
+board.phpのページに訪れた瞬間にトークンを生成。SessionManager.phpのgenerateTokenメソッドでトークンが生成される。このトークンをBoard.phpでも使えるのはセッションを使っているので、異なるスクリプト(SessionManager.phpやBoard.phpなどのPHPプログラム)で共有されるため
+
+$_POSTという箱の中に入っている、['board_token']という情報。
+$_POST['board_token'] は、フォーム送信時に送られてきたトークンのこと。SessionManager.phpのvalidateToken メソッド（工場）に、$_POST['board_token']という材料を渡して、そのトークンが正しいかどうかを確認している
+
+SessionManager.phpのvalidateToken メソッドでは、トークンが正しければ、何も返さずに、違った場合のみ処理を中止させる。
+    |
+    v
+[タイトルが入力されているか？]
+    |
+    v
+[タイトルあり] --------> [タイトルなし] ---> [タイトルのエラーメッセージを設定] ---> [終了]
+    |
+    v
+[コメントが入力されているか？]
+    |
+    v
+[コメントあり] --------> [コメントなし] ---> [コメントのエラーメッセージを設定] ---> [終了]
+    |
+    v
+[画像アップロード処理 (handleImageUpload())]
+    |
+    v
+[タイトル、コメント、画像アップロードが成功しているか？]
+    |
+    v
+[成功している] --------> [失敗している] ---> [終了]
+    |
+    v
+[データベースに投稿を保存 (insertPost())]
+if ($_SESSION['title'] != '' && $_SESSION['comment'] != '' && $imagePath !== false) {
+    $title = $_SESSION['title'];
+    $comment = $_SESSION['comment'];
+    $userId = $_SESSION['user_id'];  // ログインユーザーIDを取得
+    $this->db->insertPost($title, $comment, $userId, $imagePath);
+    unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
+}
+Database.phpのinsertPostメソッドを使用し、データーベースに、タイトル、コメント、画像、ユーザーIDを保存
+    |
+    v
+[セッションのタイトルとコメント、イメージを削除]
+保存が完了した後、unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']); でこれらのセッション変数を削除。user_id は後の処理で使用するため、削除しない。
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+[handleImageUpload()メソッド]
+private function handleImageUpload() {
+        // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
+        if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
+            // アップロードされた画像を保存するディレクトリを指定
+            $uploadDir = 'uploads/';
+            // 保存先のファイルパスを生成（ディレクトリ + ファイル名）
+            $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+
+            // アップロードされた画像ファイルを指定したディレクトリに移動
+            if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
+                // 移動に成功した場合、保存先のファイルパスを返す
+                return $uploadFile;
+            } else {
+                // 画像の移動に失敗した場合、エラーメッセージを設定し、falseを返す
+                $this->err_msg_image = '画像のアップロードに失敗しました';
+                return false;
+            }
+        }
+        return '';
+}
+    |
+    v
+[画像がアップロードされたか？]
+if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK)
+$_FILES という箱の中に 'post_image' という名前の情報が入っているかどうかを確認している。
+これは、ユーザーが画像ファイルをアップロードしようとした場合、その情報が $_FILES に保存されるため、アップロードが行われたかどうかをチェックするために使われる。
+
+$_FILES['post_image']['error'] == UPLOAD_ERR_OKについて
+ユーザーがアップロードした画像ファイルに関するさまざまな情報が $_FILES['post_image'] の中に入っている。
+
+この情報の中には、例えば以下のようなものがある。
+'name': ファイルの元の名前
+'type': ファイルのタイプ（例えば “image/jpeg” など）
+'size': ファイルのサイズ（バイト数）
+'tmp_name': サーバーに一時的に保存されたファイルのパス
+'error': アップロード中に発生したエラーコード
+
+'error' とは？
+'error' は、ファイルのアップロード時に問題が発生したかどうかを示す値。具体的には、アップロードの成功・失敗を表すコードが入ってる。
+
+UPLOAD_ERR_OK とは？
+UPLOAD_ERR_OK は、アップロードが成功したことを示す特別な定数（一定の値）。PHP では、アップロードが正常に行われた場合、この 'error' キーには UPLOAD_ERR_OK という値がセットされる。
+
+$_FILES['post_image']の['error']の中にUPLOAD_ERR_OKという情報が入っているかどうかを確認することで、画像が問題なくアップロードされたかを確認している
+
+    |
+    v
+[アップロード成功] --------> [アップロード失敗またはなし] ---> [エラーメッセージを設定しfalseを返す] ---> [終了]
+    |
+    v
+[画像を指定のディレクトリに保存]
+$uploadDir = 'uploads/';
+$uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+    |
+    v
+[画像のパスを返す]
+return $uploadFile
+この行は、「アップロードしたファイルの保存場所」を返す
+$uploadFileという箱に、保存されたファイルのパス（場所）が入っている。
+例えば、“uploads/example.jpg” というパスが返されると、その後の処理でそのファイルの場所を使って、画像を表示したり、データベースに保存したりすることができる。
+
+具体的には、handleImageUpload()メソッドで取得した画像のパスは、Board.phpのhandlePostRequestの＄imagePathという箱の中に保存される。
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getPosts()メソッド]
+//  指定されたページの投稿を取得するメソッド
+public function getPosts($page = 1, $limit = 10) {
+    return $this->db->fetchPostsByPage($page, $limit);
+}
+    |
+    v
+[データベースから指定されたページの投稿を取得 (fetchPostsByPage())]
+getPosts($page, $limit) が呼び出されると、その中で Databese.phpのfetchPostsByPage($page, $limit) が実行
+fetchPostsByPage メソッドは、データベースから指定されたページと表示件数に基づいて投稿データを取得
+    |
+    v
+[取得した投稿を返す]
+返す先は、呼び出し元の、board.phpの$post_listに格納
+$post_list = $board->getPosts($page, $limit);
+$post_list にはデータベースから取得された投稿データが格納され、これが掲示板に表示される投稿リストとして使われる
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getTotalPostCount()メソッド]
+$total_posts = $board->getTotalPostCount();
+board.phpで呼び出される。呼び出されて実行された値は、board.phpの$total_postsに格納される
+    |
+    v
+[データベースから投稿の総数を取得 (countAllPosts())]
+Database.phpのcountAllPostsメソッドを呼び出す。処理の結果としてデータベースの board_info テーブル内の投稿数をカウントし、その数を返します
+    |
+    v
+[取得した投稿の総数を返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[searchPosts()メソッド]
+board.phpで呼び出される。
+// 検索キーワードがある場合の処理と通常の投稿取得処理
+if (!empty($keyword)) {
+    // 検索キーワードがある場合の処理
+    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
+    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
+} else {
+    // 通常の投稿取得処理
+    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
+    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
+}
+    |
+    v
+[データベースから指定されたキーワードで投稿を検索 (searchPosts())]
+public function searchPosts($keyword, $page = 1, $limit = 10) {
+    return $this->db->searchPosts($keyword, $page, $limit);
+}
+Database.phpのsearchPostsを呼び出す
+
+引数になっている$keywordはboard.phpの以下の流れで渡される
+
+検索フォームに文字が入力される。method="get"が使われているので、$_GETへ情報が送られる
+<form action="board.php" method="get">
+                <input type="text" name="keyword" placeholder="検索キーワードを入力">
+                <button type="submit" name="search_button">検索</button>
+                <?php if (!empty($keyword)): ?>
+                    <a href="board.php">全て表示</a>
+                <?php endif; ?>
+            </form>
+
+送られてきた情報を$keywordに格納
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+
+検索結果を持ってくるために作られたsearchPostsを使って、($keyword, $page, $limit)をもとに検索結果を持ってきて、
+検索結果を格納するための$post_listという箱に格納される
+$post_list = $board->searchPosts($keyword, $page, $limit);
+    |
+    v
+[取得した検索結果を返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[countSearchResults()メソッド]
+public function searchPosts($keyword, $page = 1, $limit = 10) {
+        return $this->db->searchPosts($keyword, $page, $limit);
+}
+    |
+    v
+[データベースから検索結果の投稿総数を取得 (countSearchResults())]
+    |
+    v
+[取得した検索結果の総数を返す]
+このメソッドは、board.phpで呼び出されて、結果は、$total_postsに格納される
+if (!empty($keyword)) {
+    // 検索キーワードがある場合の処理
+    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
+    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
+} else {
+    // 通常の投稿取得処理
+    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
+    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
+}
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[generateToken()メソッド]
+    |
+    v
+[セッションマネージャーを使ってCSRFトークンを生成 (setToken())]
+SessionManager.phpのsetTokenを呼び出す。
+    |
+    v
+[生成されたトークンを返す]
+board.phpの$tokenへトークンを返す
+$token = $board->generateToken(); // CSRFトークンを生成
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgTitle()メソッド]
+public function getErrMsgTitle() {
+    return $this->err_msg_title;
+}
+
+タイトル欄がからの場合は、Board.phpの
+if (isset($_POST['post_title']) && $_POST['post_title'] != '') {
+    $_SESSION['title'] = $_POST['post_title'];
+    } else {
+    unset($_SESSION['title']);
+    $this->err_msg_title = '※タイトルを入力して下さい';
+}
+このコードの処理によって、private $err_msg_title = '';にタイトルを入力して下さいと格納して結果を返す。
+タイトルが記載されている場合は、private $err_msg_title = '';を空の箱のまま返す。
+    |
+    v
+[タイトルのエラーメッセージを返す]
+このメソッドはboard.phpで呼び出される。
+board.phpのコードでは、$err_msg_titleが空の場合は、何も処理をしないで、$err_msg_titleに文字が入力されている場合のみ処理を行う
+<label>
+    <p>タイトル（※最大30文字）</p>
+    <input type="text" name="post_title" value="<?php if (isset($_SESSION['title'])) echo htmlspecialchars($_SESSION['title'], ENT_QUOTES, 'UTF-8'); ?>">
+    <!-- タイトルのエラーメッセージ表示 -->
+    <?php if (!empty($board->getErrMsgTitle())) {
+        echo "<p class='err'>" . htmlspecialchars($board->getErrMsgTitle(), ENT_QUOTES, 'UTF-8') . "</p>";
+    } ?>
+</label>
+
+
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgComment()メソッド]
+上のタイトルのメソッドと流れは同じ
+    |
+    v
+[コメントのエラーメッセージを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[getErrMsgImage()メソッド]
+基本的な流れは上と同じ。だけどエラーメッセージを作成するコードは、別の場所
+    |
+    v
+[画像のエラーメッセージを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[deletePost()メソッド]
+public function deletePost($post_id) {
+        $this->db->deletePost($post_id);
+}
+
+このコードの呼び出しもとは、DeleteConfirm.php
+
+delete-confirm.phpの以下のコードでDeleteConfirm.phpのhandleRequestメソッドが呼び出される。このDeleteConfirm.phpのhandleRequestメソッドがBoard.phpのdeletePostを呼び出す。Board.phpのdeletePostを呼び出す時に、($_SESSION['id']);を引数として、($post_id)に渡す。
+$this->db->deletePost($_SESSION['id']);
+
+Board.phpのdeletePostがDatabase.php の deletePost メソッドを呼び出す。
+
+    |
+    v
+[データベースから指定された投稿を削除 (deletePost())]
+    |
+    v
+[終了]
+
+
+1.	削除ボタンをクリック: ユーザーが board.php で削除ボタンをクリックするとdelete-confirm.php に post_id が送信されます。
+2.	delete-confirm.php 内で処理: 送信された post_id は $_SESSION['id'] に保存されます。
+3.	deletePost() メソッドの呼び出し: deletePost() メソッド内で $_SESSION['id'] が取得され、それが deletePost($post_id) に引数として渡されます。
+4.	Database.php 内の処理: 最終的に Database.php 内の deletePost($post_id) が呼び出され、指定された投稿が削除されます。
+
+-------------------------------------------------------------------
+
+[getPostById()メソッド]
+    |
+    v
+[データベースから指定されたIDの投稿を取得 (getPostById())]
+    |
+    v
+[取得した投稿データを返す]
+    |
+    v
+[終了]
+
+-------------------------------------------------------------------
+
+[updatePost()メソッド]
+    |
+    v
+[データベースの投稿データを更新 (updatePost())]
+    |
+    v
+[終了]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <Database.php フローチャート>
 [Databaseクラスのインスタンス生成]
     |
@@ -647,397 +1159,7 @@ $stmt->execute();
 
 
 
-<Board.php フローチャート>
-[開始]
-    |
-    v
-[Boardクラスのインスタンス作成]
-board.phpでインスタンスを作成する
-    |
-    v
-[__construct()メソッド呼び出し]
-board.phpでインスタンスが生成されると自動でconstructが呼び出される
-    |
-    v
-[SessionManagerインスタンス作成] ---> [セッション開始 (startSession())]
-セッションは、サーバー側でユーザーごとのデータを一時的に保持するため箱
-    |
-    v
-[Databaseインスタンス作成]
-    |
-    v
-[ログイン状態を確認 isLoggedIn()メソッドの呼び出し]
-isLoggedInメソッドは、SessionManager.phpにある
-    |
-    v
-[ログイン済みか？] --------> [未ログイン] -------> [ログインページにリダイレクト] ---> [終了]
-if (!$this->sessionManager->isLoggedIn()) は、isLoggedIn メソッドを使ってユーザーがログインしているかどうかを確認。! は否定演算子で、isLoggedIn() が false を返す（ログインしていない）場合に if 文の内部が実行。
-header('Location: login.php'); は、ユーザーがログインしていない場合に、ブラウザを login.php ページにリダイレクトする。
-exit(); は、スクリプトの実行をここで終了させる。これにより、未ログインのユーザーが続行することを防ぐ。
-    |
-    v
-[ログイン済み]
-    |
-    v
-[handlePostRequest()メソッド呼び出し]
-    |
-    v
-[POSTリクエストか？（投稿ボタンが押されたか）] --------> [POSTリクエストでない] ---> [終了]
-    |
-    v
-[POSTリクエスト]
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-$_SERVERという箱の中に入っている、['REQUEST_METHOD']という情報が、POSTであるか確認している。
-    |
-    v
-[CSRFトークンを検証 (validateToken())]
-どのタイミングでトークンが生成されるのか？
-board.phpのページに訪れた瞬間にトークンを生成。SessionManager.phpのgenerateTokenメソッドでトークンが生成される。このトークンをBoard.phpでも使えるのはセッションを使っているので、異なるスクリプト(SessionManager.phpやBoard.phpなどのPHPプログラム)で共有されるため
 
-$_POSTという箱の中に入っている、['board_token']という情報。
-$_POST['board_token'] は、フォーム送信時に送られてきたトークンのこと。SessionManager.phpのvalidateToken メソッド（工場）に、$_POST['board_token']という材料を渡して、そのトークンが正しいかどうかを確認している
-
-SessionManager.phpのvalidateToken メソッドでは、トークンが正しければ、何も返さずに、違った場合のみ処理を中止させる。
-    |
-    v
-[タイトルが入力されているか？]
-    |
-    v
-[タイトルあり] --------> [タイトルなし] ---> [タイトルのエラーメッセージを設定] ---> [終了]
-    |
-    v
-[コメントが入力されているか？]
-    |
-    v
-[コメントあり] --------> [コメントなし] ---> [コメントのエラーメッセージを設定] ---> [終了]
-    |
-    v
-[画像アップロード処理 (handleImageUpload())]
-    |
-    v
-[タイトル、コメント、画像アップロードが成功しているか？]
-    |
-    v
-[成功している] --------> [失敗している] ---> [終了]
-    |
-    v
-[データベースに投稿を保存 (insertPost())]
-if ($_SESSION['title'] != '' && $_SESSION['comment'] != '' && $imagePath !== false) {
-    $title = $_SESSION['title'];
-    $comment = $_SESSION['comment'];
-    $userId = $_SESSION['user_id'];  // ログインユーザーIDを取得
-    $this->db->insertPost($title, $comment, $userId, $imagePath);
-    unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
-}
-Database.phpのinsertPostメソッドを使用し、データーベースに、タイトル、コメント、画像、ユーザーIDを保存
-    |
-    v
-[セッションのタイトルとコメント、イメージを削除]
-保存が完了した後、unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']); でこれらのセッション変数を削除。user_id は後の処理で使用するため、削除しない。
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-[handleImageUpload()メソッド]
-private function handleImageUpload() {
-        // フォームで画像がアップロードされているか確認し、アップロードにエラーがないか確認
-        if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
-            // アップロードされた画像を保存するディレクトリを指定
-            $uploadDir = 'uploads/';
-            // 保存先のファイルパスを生成（ディレクトリ + ファイル名）
-            $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
-
-            // アップロードされた画像ファイルを指定したディレクトリに移動
-            if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
-                // 移動に成功した場合、保存先のファイルパスを返す
-                return $uploadFile;
-            } else {
-                // 画像の移動に失敗した場合、エラーメッセージを設定し、falseを返す
-                $this->err_msg_image = '画像のアップロードに失敗しました';
-                return false;
-            }
-        }
-        return '';
-}
-    |
-    v
-[画像がアップロードされたか？]
-if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK)
-$_FILES という箱の中に 'post_image' という名前の情報が入っているかどうかを確認している。
-これは、ユーザーが画像ファイルをアップロードしようとした場合、その情報が $_FILES に保存されるため、アップロードが行われたかどうかをチェックするために使われる。
-
-$_FILES['post_image']['error'] == UPLOAD_ERR_OKについて
-ユーザーがアップロードした画像ファイルに関するさまざまな情報が $_FILES['post_image'] の中に入っている。
-
-この情報の中には、例えば以下のようなものがある。
-'name': ファイルの元の名前
-'type': ファイルのタイプ（例えば “image/jpeg” など）
-'size': ファイルのサイズ（バイト数）
-'tmp_name': サーバーに一時的に保存されたファイルのパス
-'error': アップロード中に発生したエラーコード
-
-'error' とは？
-'error' は、ファイルのアップロード時に問題が発生したかどうかを示す値。具体的には、アップロードの成功・失敗を表すコードが入ってる。
-
-UPLOAD_ERR_OK とは？
-UPLOAD_ERR_OK は、アップロードが成功したことを示す特別な定数（一定の値）。PHP では、アップロードが正常に行われた場合、この 'error' キーには UPLOAD_ERR_OK という値がセットされる。
-
-$_FILES['post_image']の['error']の中にUPLOAD_ERR_OKという情報が入っているかどうかを確認することで、画像が問題なくアップロードされたかを確認している
-
-    |
-    v
-[アップロード成功] --------> [アップロード失敗またはなし] ---> [エラーメッセージを設定しfalseを返す] ---> [終了]
-    |
-    v
-[画像を指定のディレクトリに保存]
-$uploadDir = 'uploads/';
-$uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
-    |
-    v
-[画像のパスを返す]
-return $uploadFile
-この行は、「アップロードしたファイルの保存場所」を返す
-$uploadFileという箱に、保存されたファイルのパス（場所）が入っている。
-例えば、“uploads/example.jpg” というパスが返されると、その後の処理でそのファイルの場所を使って、画像を表示したり、データベースに保存したりすることができる。
-
-具体的には、handleImageUpload()メソッドで取得した画像のパスは、Board.phpのhandlePostRequestの＄imagePathという箱の中に保存される。
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[getPosts()メソッド]
-//  指定されたページの投稿を取得するメソッド
-public function getPosts($page = 1, $limit = 10) {
-    return $this->db->fetchPostsByPage($page, $limit);
-}
-    |
-    v
-[データベースから指定されたページの投稿を取得 (fetchPostsByPage())]
-getPosts($page, $limit) が呼び出されると、その中で Databese.phpのfetchPostsByPage($page, $limit) が実行
-fetchPostsByPage メソッドは、データベースから指定されたページと表示件数に基づいて投稿データを取得
-    |
-    v
-[取得した投稿を返す]
-返す先は、呼び出し元の、board.phpの$post_listに格納
-$post_list = $board->getPosts($page, $limit);
-$post_list にはデータベースから取得された投稿データが格納され、これが掲示板に表示される投稿リストとして使われる
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[getTotalPostCount()メソッド]
-$total_posts = $board->getTotalPostCount();
-board.phpで呼び出される。呼び出されて実行された値は、board.phpの$total_postsに格納される
-    |
-    v
-[データベースから投稿の総数を取得 (countAllPosts())]
-Database.phpのcountAllPostsメソッドを呼び出す。処理の結果としてデータベースの board_info テーブル内の投稿数をカウントし、その数を返します
-    |
-    v
-[取得した投稿の総数を返す]
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[searchPosts()メソッド]
-board.phpで呼び出される。
-// 検索キーワードがある場合の処理と通常の投稿取得処理
-if (!empty($keyword)) {
-    // 検索キーワードがある場合の処理
-    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
-    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
-} else {
-    // 通常の投稿取得処理
-    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
-    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
-}
-    |
-    v
-[データベースから指定されたキーワードで投稿を検索 (searchPosts())]
-public function searchPosts($keyword, $page = 1, $limit = 10) {
-    return $this->db->searchPosts($keyword, $page, $limit);
-}
-Database.phpのsearchPostsを呼び出す
-
-引数になっている$keywordはboard.phpの以下の流れで渡される
-
-検索フォームに文字が入力される。method="get"が使われているので、$_GETへ情報が送られる
-<form action="board.php" method="get">
-                <input type="text" name="keyword" placeholder="検索キーワードを入力">
-                <button type="submit" name="search_button">検索</button>
-                <?php if (!empty($keyword)): ?>
-                    <a href="board.php">全て表示</a>
-                <?php endif; ?>
-            </form>
-
-送られてきた情報を$keywordに格納
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-
-検索結果を持ってくるために作られたsearchPostsを使って、($keyword, $page, $limit)をもとに検索結果を持ってきて、
-検索結果を格納するための$post_listという箱に格納される
-$post_list = $board->searchPosts($keyword, $page, $limit);
-    |
-    v
-[取得した検索結果を返す]
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[countSearchResults()メソッド]
-public function searchPosts($keyword, $page = 1, $limit = 10) {
-        return $this->db->searchPosts($keyword, $page, $limit);
-}
-    |
-    v
-[データベースから検索結果の投稿総数を取得 (countSearchResults())]
-    |
-    v
-[取得した検索結果の総数を返す]
-このメソッドは、board.phpで呼び出されて、結果は、$total_postsに格納される
-if (!empty($keyword)) {
-    // 検索キーワードがある場合の処理
-    $post_list = $board->searchPosts($keyword, $page, $limit); // 検索結果を取得
-    $total_posts = $board->countSearchResults($keyword); // 検索結果の総投稿数を取得
-} else {
-    // 通常の投稿取得処理
-    $post_list = $board->getPosts($page, $limit); // 指定されたページの投稿一覧を取得
-    $total_posts = $board->getTotalPostCount(); // 総投稿数を取得
-}
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[generateToken()メソッド]
-    |
-    v
-[セッションマネージャーを使ってCSRFトークンを生成 (setToken())]
-SessionManager.phpのsetTokenを呼び出す。
-    |
-    v
-[生成されたトークンを返す]
-board.phpの$tokenへトークンを返す
-$token = $board->generateToken(); // CSRFトークンを生成
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[getErrMsgTitle()メソッド]
-public function getErrMsgTitle() {
-    return $this->err_msg_title;
-}
-
-タイトル欄がからの場合は、Board.phpの
-if (isset($_POST['post_title']) && $_POST['post_title'] != '') {
-    $_SESSION['title'] = $_POST['post_title'];
-    } else {
-    unset($_SESSION['title']);
-    $this->err_msg_title = '※タイトルを入力して下さい';
-}
-このコードの処理によって、private $err_msg_title = '';にタイトルを入力して下さいと格納して結果を返す。
-タイトルが記載されている場合は、private $err_msg_title = '';を空の箱のまま返す。
-    |
-    v
-[タイトルのエラーメッセージを返す]
-このメソッドはboard.phpで呼び出される。
-board.phpのコードでは、$err_msg_titleが空の場合は、何も処理をしないで、$err_msg_titleに文字が入力されている場合のみ処理を行う
-<label>
-    <p>タイトル（※最大30文字）</p>
-    <input type="text" name="post_title" value="<?php if (isset($_SESSION['title'])) echo htmlspecialchars($_SESSION['title'], ENT_QUOTES, 'UTF-8'); ?>">
-    <!-- タイトルのエラーメッセージ表示 -->
-    <?php if (!empty($board->getErrMsgTitle())) {
-        echo "<p class='err'>" . htmlspecialchars($board->getErrMsgTitle(), ENT_QUOTES, 'UTF-8') . "</p>";
-    } ?>
-</label>
-
-
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[getErrMsgComment()メソッド]
-上のタイトルのメソッドと流れは同じ
-    |
-    v
-[コメントのエラーメッセージを返す]
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[getErrMsgImage()メソッド]
-基本的な流れは上と同じ。だけどエラーメッセージを作成するコードは、別の場所
-    |
-    v
-[画像のエラーメッセージを返す]
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[deletePost()メソッド]
-public function deletePost($post_id) {
-        $this->db->deletePost($post_id);
-}
-
-このコードの呼び出しもとは、DeleteConfirm.php
-
-delete-confirm.phpの以下のコードでDeleteConfirm.phpのhandleRequestメソッドが呼び出される。このDeleteConfirm.phpのhandleRequestメソッドがBoard.phpのdeletePostを呼び出す。Board.phpのdeletePostを呼び出す時に、($_SESSION['id']);を引数として、($post_id)に渡す。
-$this->db->deletePost($_SESSION['id']);
-
-Board.phpのdeletePostがDatabase.php の deletePost メソッドを呼び出す。
-
-    |
-    v
-[データベースから指定された投稿を削除 (deletePost())]
-    |
-    v
-[終了]
-
-
-1.	削除ボタンをクリック: ユーザーが board.php で削除ボタンをクリックするとdelete-confirm.php に post_id が送信されます。
-2.	delete-confirm.php 内で処理: 送信された post_id は $_SESSION['id'] に保存されます。
-3.	deletePost() メソッドの呼び出し: deletePost() メソッド内で $_SESSION['id'] が取得され、それが deletePost($post_id) に引数として渡されます。
-4.	Database.php 内の処理: 最終的に Database.php 内の deletePost($post_id) が呼び出され、指定された投稿が削除されます。
-
--------------------------------------------------------------------
-
-[getPostById()メソッド]
-    |
-    v
-[データベースから指定されたIDの投稿を取得 (getPostById())]
-    |
-    v
-[取得した投稿データを返す]
-    |
-    v
-[終了]
-
--------------------------------------------------------------------
-
-[updatePost()メソッド]
-    |
-    v
-[データベースの投稿データを更新 (updatePost())]
-    |
-    v
-[終了]
 
 
 
