@@ -57,12 +57,5 @@ class SessionManager
     {
         return isset($_SESSION['user_id']);
     }
-
-    // // ログイン状態を設定するメソッド　削除予定
-    // public function loginUser($user_id)
-    // {
-    //     $_SESSION['user_id'] = $user_id;
-    // }
-
 }
 ?>
