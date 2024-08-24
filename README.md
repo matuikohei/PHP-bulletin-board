@@ -100,6 +100,7 @@ PHP BULLETIN BOARD/
 - handlePostRequest() メソッド:コメントとタイトルを別のメソッドへ分ける
 - 画像アップロードのセキュリティ対策：ファイル名のランダム化とMIMEタイプのチェックを追加
 - データベース操作：例外処理の追加
+- generateTokenメソッドがBoardクラスとDeleteConfirmクラスにある。共有化できるなら共有化したい
 
 ### Database.php
 - SQL文の共通化：searchPosts や fetchPostsByPage で同じコードを書いているから共通化する
@@ -109,7 +110,7 @@ PHP BULLETIN BOARD/
 ### SessionManager.php
 - 初期の掲示板アプリでは、セッションの時間で、ユーザー識別していたけど、ログイン機能をつけたからいらない？セッションハイジャック対策でいる？検討中
 - startSession() メソッドがif ifになっているから修正したい
-
+- validateTokenメソッドがSessionManagerクラスとUpdateEditクラスの二つにある。共通化できるなら共通化したい
 
 
 ## 感想・反省点
