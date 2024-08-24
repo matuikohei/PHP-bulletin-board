@@ -320,15 +320,23 @@ PDO::FETCH_ASSOC:。このオプションは、データを連想配列の形式
 
 
 <searchPostsメソッド>
-public function fetchPostsByPage($page, $limit)
+public function searchPosts($keyword, $page, $limit)
     {
         $offset = ($page - 1) * $limit;
-        $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM board_info
+             WHERE title LIKE :keyword1 OR comment LIKE :keyword2
+             ORDER BY id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue(':keyword1', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 #処理の流れ
 board.php → Board.php searchPostsメソッド → Database.php searchPostsメソッド
 
@@ -1441,31 +1449,24 @@ unset($_SESSION['board_token']); および unset($_POST['board_token']);
 	    •そのため、使い終わったトークンはすぐに削除して、次に使われないようにしています。
 
 
-
-
-
 <isLoggedIn() メソッド>
 public function isLoggedIn()
 {
     return isset($_SESSION['user_id']);
 }
 
-#ログイン状態の確認:
- •isset($_SESSION['user_id']): ユーザーがログインしているかを確認します。セッションにuser_idが設定されていれば、ログインしているとみなされます。
+#メソッドの概要
+このPHPコードは、isLoggedInという関数を定義しています。この関数は、ユーザーがログインしているかどうかを確認するために使われます。
 
+#処理内容
+return isset($_SESSION['user_id']);
+    •isset()：これはPHPの組み込み関数で、括弧内の変数や配列の要素が存在しているかどうかを確認します。存在していればtrueを返し、存在していなければfalseを返します。
+	•$_SESSION['user_id']：$_SESSIONはPHPのスーパーグローバル変数で、セッションに保存されているデータにアクセスするために使います。['user_id']は、そのセッションの中のuser_idという名前のデータを指します。
 
-<logoutUser() メソッド>
-public function logoutUser()
-{
-    session_unset();
-    session_destroy();
-}
-#ログアウト処理:
- •session_unset(): 現在のセッション変数をすべて解除します。
- •session_destroy(): セッション自体を破棄します。これにより、ユーザーはログアウト状態になります。
-
-
-
+#この関数の意味
+このisLoggedIn関数は、ユーザーがログインしているかどうかを確認します。具体的には、セッションにuser_idという名前のデータが保存されているかどうかを調べます。
+	•user_idがセッションに存在している場合（つまり、ユーザーがログインしている場合）、isset($_SESSION['user_id'])はtrueを返し、関数全体もtrueを返します。
+	•user_idがセッションに存在しない場合（つまり、ユーザーがログインしていない場合）、isset($_SESSION['user_id'])はfalseを返し、関数全体もfalseを返します。
 
 
 
