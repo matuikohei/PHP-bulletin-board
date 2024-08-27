@@ -101,6 +101,7 @@ PHP BULLETIN BOARD/
 - 画像アップロードのセキュリティ対策：ファイル名のランダム化とMIMEタイプのチェックを追加
 - データベース操作：例外処理の追加
 - generateTokenメソッドがBoardクラスとDeleteConfirmクラスにある。共有化できるなら共有化したい
+- handleImageUploadメソッドがBoard.phpとUpdateEdit.phpにある。共有化できるなら共通化したい
 
 ### Database.php
 - SQL文の共通化：searchPosts や fetchPostsByPage で同じコードを書いているから共通化する
