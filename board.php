@@ -1,16 +1,5 @@
 <?php
 require_once 'classes/Board.php';
-require_once 'classes/SessionManager.php';
-
-// セッション管理とログイン状態の確認
-$sessionManager = new SessionManager();
-$sessionManager->startSession();
-
-// ログインしているか確認
-if (!$sessionManager->isLoggedIn()) {
-    header('Location: login.php'); // ログインしていない場合はログインページにリダイレクト
-    exit();
-}
 
 // 現在のページ番号を取得
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
