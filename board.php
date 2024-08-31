@@ -103,9 +103,6 @@ $total_pages = ceil($total_posts / $limit);
             <form action="board.php" method="get">
                 <input type="text" name="keyword" placeholder="検索キーワードを入力">
                 <button type="submit" name="search_button">検索</button>
-                <?php if (!empty($keyword)): ?>
-                    <a href="board.php">全て表示</a>
-                <?php endif; ?>
             </form>
         </section>
 
@@ -153,7 +150,7 @@ $total_pages = ceil($total_posts / $limit);
         <!-- ページネーション -->
         <section class="pagination">
             <?php if (!empty($keyword)): ?>
-                <a href="board.php">全て表示</a>
+                <a href="board.php">トップページへ戻る</a>
             <?php endif; ?>
             <?php if ($page > 1): ?>
                 <a href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">&laquo; 前のページ</a>

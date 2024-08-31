@@ -104,6 +104,7 @@ class Board
     }
 
     // 検索キーワードに基づいて投稿を取得するメソッド
+    // $page = 1, $limit = 10 の値の代入はいらない？
     public function searchPosts($keyword, $page = 1, $limit = 10)
     {
         return $this->db->searchPosts($keyword, $page, $limit);

@@ -101,7 +101,10 @@ PHP BULLETIN BOARD/
 - 画像アップロードのセキュリティ対策：ファイル名のランダム化とMIMEタイプのチェックを追加
 - データベース操作：例外処理の追加
 - generateTokenメソッドがBoardクラスとDeleteConfirmクラスにある。共有化できるなら共有化したい
-- handleImageUploadメソッドがBoard.phpとUpdateEdit.phpにある。共有化できるなら共通化したい
+- Board.phpのsearchPostsメソッドの$page = 1, $limit = 10 の値の代入はいらない？
+- countSearchResults（検索結果の総投稿数を取得するメソッド）、getTotalPostCount（検索されていない。通常の投稿数を取得するメソッド）同じ投稿数を取得するメソッドなのに、命名に統一感がないから修正したい
+- 検索結果の全て表示ボタンを削除したい
+- Board.phpとUpateEdit.phpとDeleteConfirm.phpのgenerateTokenメソッドを共有化したい。するならセッションマネージャ
 
 ### Database.php
 - SQL文の共通化：searchPosts や fetchPostsByPage で同じコードを書いているから共通化する

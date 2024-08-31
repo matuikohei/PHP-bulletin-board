@@ -47,6 +47,256 @@ HTMLの生成と表示
 
 
 
+<ページネーション流れと動作>
+#処理の流れ
+    •	URLからページ番号と検索キーワードを取得
+    •   1ページあたりの表示件数を設定
+	•	投稿のリクエストを処理
+	•	投稿のリストを取得
+    •	総ページ数を計算
+	•   ページネーションのリンクを生成
+
+#ページ番号の取得
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    	•説明：現在のページ番号を取得するためのコード
+        •基本構文：
+            条件式 ? 真の場合の値 : 偽の場合の値;
+	    •$_GET['page'] を使って、URLのクエリパラメータ（例: board.php?page=2）からページ番号を取得します。
+	    •isset() 関数で $_GET['page'] が設定されているか確認します。
+        •isset($_GET['page']) は、page というパラメータがURLに含まれているかをチェックします。あればその値を使い、なければデフォルトで 1（1ページ目）を使用します。
+	    •(int) は、取得した値を整数に変換します。
+
+#１ページあたりの表示件数の設定
+    $limit = 10; // 1ページあたりの表示件数
+        •$limit は1ページに表示する投稿の数を設定するための変数で、ここでは10件に設定されています。
+
+#検索キーワードの取得と処理
+    $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+
+    •$keyword の設定:
+        •$_GET['keyword'] を使って、URLから検索キーワードを取得します。
+	    •isset() 関数で $_GET['keyword'] が設定されているか確認します。
+	    •設定されていればそのキーワードを使い、設定されていなければ空の文字列を使います。
+
+#投稿の取得
+    if (!empty($keyword)) {
+        $post_list = $board->searchPosts($keyword, $page, $limit);
+        $total_posts = $board->countSearchResults($keyword);
+    } else {
+        $post_list = $board->getPosts($page, $limit);
+        $total_posts = $board->getTotalPostCount();
+    }
+
+    •投稿の取得:
+	    •検索キーワードがある場合:
+	        •$board->searchPosts($keyword, $page, $limit) メソッドで、キーワードに基づく検索結果を取得します。
+	        •$board->countSearchResults($keyword) メソッドで、検索結果の総投稿数を取得します。
+	    •検索キーワードがない場合:
+	        •$board->getPosts($page, $limit) メソッドで、現在のページに表示する投稿の一覧を取得します。
+	        •$board->getTotalPostCount() メソッドで、掲示板全体の総投稿数を取得します。
+
+
+#総ページ数の計算
+    $total_pages = ceil($total_posts / $limit);
+
+    •総ページ数の計算:
+        •$total_posts（総投稿数）を $limit（1ページあたりの投稿数）で割り、総ページ数を計算します。
+	    •ceil() 関数は小数点以下を切り上げるため、投稿数が 25 件で1ページに 10 件表示する場合、総ページ数は 3 になります。
+
+
+#ページネーションリンクの生成
+    <section class="pagination">
+            <?php if (!empty($keyword)): ?>
+                <a href="board.php">トップページへ戻る</a>
+            <?php endif; ?>
+            <?php if ($page > 1): ?>
+                <a href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">&laquo; 前のページ</a>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?page=<?php echo $i; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" <?php if ($i == $page) echo 'class="current-page"'; ?>>
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+            <?php if ($page < $total_pages): ?>
+                <a href="?page=<?php echo $page + 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">次のページ &raquo;</a>
+            <?php endif; ?>
+    </section>
+
+    #トップページへ戻るリンク
+        <?php if (!empty($keyword)): ?>
+            <a href="board.php">トップページへ戻る</a>
+        <?php endif; ?>
+
+        •目的: 検索結果が表示されている場合に、トップページへ戻るリンクを表示します。
+	    •動作:
+	        •!empty($keyword) は、検索キーワードが空ではないか（つまり、何か入力されているか）をチェックします。
+	        •キーワードが存在する場合は「トップページへ戻る」リンクを表示し、クリックすると board.php に戻ります。
+
+
+    #前のページへ戻るリンク
+        <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">&laquo; 前のページ</a>
+        <?php endif; ?>
+
+        •目的: 現在のページが1ページ目でない場合に、「前のページ」リンクを表示します。
+	    •動作:
+	        •$page > 1 は、現在のページが2ページ目以降であることを確認します。
+	        •この条件が満たされたとき、「前のページ」のリンクが表示され、リンクをクリックすると現在のページ番号より1少ないページに移動します。
+	        •htmlspecialchars() 関数を使って、キーワードを安全にHTMLエンコードします。
+
+        #<?php if ($page > 1): ?>
+	        •目的: 現在のページが1ページ目ではない場合に「前のページ」へのリンクを表示する条件を作ります。
+	        •動作:
+            •$page > 1 は、「現在のページが2ページ目以上である」という条件です。
+            •もし $page が2以上であれば、この条件は true になり、次のリンクが表示されます。
+            •もし $page が1であれば、この条件は false になり、リンクは表示されません。これは、1ページ目より前のページは存在しないためです。
+
+        #<a href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">&laquo; 前のページ</a>
+            •目的: 「前のページ」へのリンクを作成します。
+	        •動作:
+                •<a href="..."> はリンク（アンカータグ）を作るHTMLの構文です。
+                •href="?page=<?php echo $page - 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" の部分がリンク先のURLを決定します。
+                •?page=<?php echo $page - 1; ?> は、現在のページ番号から1を引いた値を前のページ番号として設定しています。
+                •例えば、今いるページが3なら page=2 となり、前のページ（2ページ目）に移動するリンクが生成されます。
+                •&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?> は、検索キーワードがある場合にそのキーワードもURLに含めます。これにより、前のページにも同じ検索結果を引き継ぎます。
+                •htmlspecialchars() は、キーワードをHTMLエンコードして、特別な文字が誤ってHTMLとして扱われないようにします。これは、セキュリティのために重要です。
+
+        #&laquo; 前のページ
+            •目的: ユーザーに「前のページに戻る」という選択肢を視覚的に提供します。
+            •動作:
+                •&laquo; は、「«」の記号で、視覚的に「戻る」方向を示します。
+                •「前のページ」というテキストが表示され、リンク全体がクリック可能になります。
+
+        #なぜ、コード内に board.php と直接記述されていないのに、URLが board.php から始まるの？
+        →理由は、リンクのhref属性に相対パスが使われているためです。
+        	•現在のページのURLを基準に解釈される:
+	        •例えば、現在のページが http://example.com/board.php の場合、 <a href="?page=2"> というリンクがあれば、ブラウザはこのリンクを http://example.com/board.php?page=2 と解釈します。
+
+        #なぜ htmlspecialchars を使うのか？
+            1.セキュリティのため（XSS対策）
+                •XSS（クロスサイトスクリプティング） という攻撃方法があり、攻撃者が悪意のあるコードを入力して、それが他のユーザーに表示されるときに実行されてしまうことがあります。
+                •例えば、ユーザーが <script>alert('悪意のあるコード');</script> のようなコードを入力すると、それがそのまま実行されてしまいます。
+                •htmlspecialchars を使うと、< や > といった記号がそれぞれ &lt; や &gt; といった無害な形に変換されるため、ブラウザはこれを単なるテキストとして扱い、実行しません。
+
+            2.HTMLの表示崩れを防ぐため
+                •特殊なHTML文字（例えば <, >, &, "）は、HTMLでは特別な意味を持ちます。これらがそのまま表示されると、HTMLの構造が崩れてしまう可能性があります。
+                •htmlspecialchars を使うと、これらの文字がHTMLのタグやエンティティとしてではなく、単なる文字として表示されるようになります。
+
+            具体例
+                例えば、掲示板アプリでユーザーが以下のコメントを投稿したとします：
+                こんにちは！<strong>重要</strong>な情報があります。
+                そのまま表示すると：
+                こんにちは！<strong>重要</strong>な情報があります。
+                これは、HTMLのタグとして解釈されて、「重要」という部分が太字で表示されます。しかし、もしこれが攻撃者による悪意のあるスクリプトだった場合、サイトのセキュリティが脅かされる可能性があります。
+                そこで、htmlspecialchars を使うと：
+                echo htmlspecialchars('こんにちは！<strong>重要</strong>な情報があります。', ENT_QUOTES, 'UTF-8');
+                これによって出力はこうなります：
+                こんにちは！&lt;strong&gt;重要&lt;/strong&gt;な情報があります。
+                これなら、ブラウザはタグとして解釈せず、テキストとして安全に表示します。
+
+
+    #ページ番号のリンク作成
+        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <a href="?page=<?php echo $i; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" <?php if ($i == $page) echo 'class="current-page"'; ?>>
+            <?php echo $i; ?>
+            </a>
+        <?php endfor; ?>
+
+        #for文基本構文
+            for (初期化; ループの条件; 変数の更新) {
+                    // 繰り返し実行したいコード
+            }
+
+        #ループ (for) の開始
+            for ($i = 1; $i <= $total_pages; $i++):
+                •この行はループを設定しています。$i は1から始まり、$total_pages の値まで繰り返します。
+                •$total_pages は、全体のページ数です。例えば、投稿が100件あって1ページに10件表示する場合、$total_pages は10になります。
+
+        #リンク (<a>) の生成
+            <a href="?page=<?php echo $i; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" <?php if ($i == $page) echo 'class="current-page"'; ?>>
+                •各ループの繰り返しで、ページ番号へのリンクを作成します。
+                •href="?page=<?php echo $i; ?>:
+                    •?page=<?php echo $i; ?> の部分では、リンクをクリックしたときにそのページ番号がクエリパラメータ（URLの一部）として指定されます。
+                    •例えば、$i が3の場合、リンクは ?page=3 になります。
+                •&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>:
+                    •ここで検索キーワードが付加されています。$keyword が安全に表示されるように htmlspecialchars 関数でエスケープされています。
+                    •これにより、ユーザーが何かしらの検索をした場合、その検索条件を保持したままページ移動ができます。
+
+        #現在のページのスタイル適用
+            <?php if ($i == $page) echo 'class="current-page"'; ?>:
+                •ここでは、現在のページを視覚的に区別するために、現在のページ番号のリンクに特定のクラス（current-page）を追加しています。このクラスを追加し、cssを記述することで現在のページのみ青の枠で囲まれるようになります
+                •例えば、現在のページが3で $i も3の場合、リンクタグは次のようになります:
+                <a href="?page=3&keyword=検索キーワード" class="current-page">3</a>
+
+    #次のページへ進むリンク
+        <?php if ($page < $total_pages): ?>
+                <a href="?page=<?php echo $page + 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">次のページ &raquo;</a>
+        <?php endif; ?>
+
+        #条件分岐if文
+            <?php if ($page < $total_pages): ?>
+                •$page は現在表示しているページ番号、$total_pages は全体のページ数を表しています。
+                •この条件は、「現在のページ番号が全ページ数より小さい場合」をチェックしています。例えば、現在が2ページ目で全体が5ページあれば、この条件は true になります。
+                •これにより、「次のページ」がまだある場合にだけ「次のページ」リンクを表示します。
+
+        #リンクの生成 (<a href="..."> タグ):
+            <a href="?page=<?php echo $page + 1; ?>&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>">次のページ &raquo;</a>
+
+            •<a href="..."> タグはHTMLでリンクを作るためのタグです。
+                •href 属性にはリンク先のURLが入ります。
+                •?page=<?php echo $page + 1; ?> は、次のページ番号に進むためのURLパラメータを指定しています。例えば、現在のページが2なら、$page + 1 によって 3 になります。リンク先は ?page=3 になります。
+                •&keyword=<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?> は、検索キーワードをURLに含めています。htmlspecialchars 関数を使ってキーワードを安全な形に変換しています。htmlspecialchars は、HTMLにおける特殊文字（例えば < や >) を安全な文字列（&lt; や &gt;）に変換して、XSS攻撃などのセキュリティリスクを防ぐために使用します。
+
+        #リンクテキスト
+            次のページ &raquo;
+                •この部分はリンクのテキストとして表示されます。&raquo; はHTMLの特殊文字で、「»」という矢印の記号になります。
+                •つまり、リンクは「次のページ »」というテキストとして表示されます。
+
+        #終了タグ (endif):
+            •この行は if 文の終わりを示しています。
+            •これによって、上記のリンク表示は「次のページ」が存在する場合にのみ行われるようになります。
+
+
+    #なぜ飛んだ先のページの表示内容が変わるのか?
+        •ページ遷移の際にURLに含まれる page パラメータ（URLに記述されているページ番号）を基に異なるデータを取得するように設計されています。
+        •例えば、board.php?page=2 というURLにアクセスすると、$page 変数が2となり、2ページ目のデータ（11件目から20件目）が取得されます。
+        •取得されたデータが $post_list に格納され、HTML内でループを使って表示されます。
+        •このため、ページが変わるたびに表示される内容も変更されます。
+
+
+
+
+
+
+
+
+
+
+    •if (!empty($keyword)):
+	    •PHPの if 文は、条件が true の場合にその中のコードを実行します。
+        •empty() 関数は、変数が空（空文字列、0、null、空の配列など）の場合に true を返します。!（否定）を使うことで、$keyword が「空ではない」場合に true になります。
+        •つまり、「$keyword が設定されていて空でない場合」に、「全て表示」リンクを表示します。
+	•リンクの動作:
+	    •<a href="board.php">全て表示</a> のリンクをクリックすると、検索キーワードをリセットして、全ての投稿を表示するページに移動します。
+
+    •リンク生成:
+	    •現在のページ番号に基づいて、「前のページ」「次のページ」へのリンクを表示します。
+    	•ページ番号のリンクを生成し、現在のページを強調表示します（class="current-page"）。
+
+#ページネーションの実際の動作
+	•ページリンクをクリックすると、page パラメータ付きのURLが生成されます（例: board.php?page=2）。
+	•次のページに移動すると、$page の値が変更され、新しいページの内容が表示されます。
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1159,30 +1409,30 @@ public function searchPosts($keyword, $page, $limit)
 board.php → Board.php searchPostsメソッド → Database.php searchPostsメソッド
 
 #メソッドの役割
-この searchPosts メソッドは、掲示板アプリケーション内で、ユーザーが入力したキーワードに基づいて投稿を検索し、その検索結果をページごとに表示するための機能を提供します。
+    この searchPosts メソッドは、掲示板アプリケーション内で、ユーザーが入力したキーワードに基づいて投稿を検索し、その検索結果をページごとに表示するための機能を提供します。
 
 #メソッド宣言部分
-public function searchPosts($keyword, $page, $limit)
+    public function searchPosts($keyword, $page, $limit)
 
 -説明
-$keyword:
-ユーザーが検索ボックスに入力したキーワード。これを基に、タイトルやコメントの中から一致する投稿を検索します。
-$page:
-現在表示するページ番号。ページネーション（複数ページに分割して表示）を実現するために使います。
-$limit:
-1ページに表示する投稿の数。例えば、1ページに10件表示する場合、この値は10になります。
+    $keyword:
+        ユーザーが検索ボックスに入力したキーワード。これを基に、タイトルやコメントの中から一致する投稿を検索します。
+    $page:
+        現在表示するページ番号。ページネーション（複数ページに分割して表示）を実現するために使います。
+    $limit:
+        1ページに表示する投稿の数。例えば、1ページに10件表示する場合、この値は10になります。
 
 #オフセットの計算
-$offset = ($page - 1) * $limit;
+    $offset = ($page - 1) * $limit;
 
 -説明
-このコードは、データベースからデータを取得するときに、「どこからデータを取り始めるか」を計算しています。具体的には、ページネーションと呼ばれる機能を実現するために使われます。このコードは、データベースからどの位置からデータを取り始めるかを決めるために使われます。ページネーションを実現するために、特定のページに表示するデータのスタート位置を計算しています。
+    このコードは、データベースからデータを取得するときに、「どこからデータを取り始めるか」を計算しています。具体的には、ページネーションと呼ばれる機能を実現するために使われます。このコードは、データベースからどの位置からデータを取り始めるかを決めるために使われます。ページネーションを実現するために、特定のページに表示するデータのスタート位置を計算しています。
 
 -具体例
-1ページ目:
-$page = 1 のとき、$offset は (1 - 1) * 10 = 0 です。つまり、最初のデータから表示を始めます。
-2ページ目:
-$page = 2 のとき、$offset は (2 - 1) * 10 = 10 です。つまり、11番目のデータから表示を始めます。
+    1ページ目:
+        $page = 1 のとき、$offset は (1 - 1) * 10 = 0 です。つまり、最初のデータから表示を始めます。
+    2ページ目:
+        $page = 2 のとき、$offset は (2 - 1) * 10 = 10 です。つまり、11番目のデータから表示を始めます。
 3ページ目:
 $page = 3 のとき、$offset は (3 - 1) * 10 = 20 です。つまり、21番目のデータから表示を始めます。
 
