@@ -34,7 +34,7 @@ class User
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // パスワードが一致するかを確認
+        // ユーザーが入力したパスワードとデータベースのパスワードが一致するかを確認
         if ($user && password_verify($password, $user['password'])) {
             // セッションにユーザーIDとユーザー名を保存し、ログイン状態に設定
             $_SESSION['user_id'] = $user['id'];
@@ -44,11 +44,11 @@ class User
         return false; // ログイン失敗
     }
 
-    // ユーザーがログインしているかを確認するメソッド
-    public function isLoggedIn()
-    {
-        return isset($_SESSION['user_id']); // セッションにuser_idが設定されていればログイン中と見なす
-    }
+    // ユーザーがログインしているかを確認するメソッド 削除予定
+    // public function isLoggedIn()
+    // {
+    //     return isset($_SESSION['user_id']); // セッションにuser_idが設定されていればログイン中と見なす
+    // }
 
     // ユーザーのログアウトを処理するメソッド
     public function logout()

@@ -92,6 +92,8 @@ class Board
     }
 
     //  指定されたページの投稿を取得するメソッド
+    //  $page = 1, $limit = 10 の記述はデフォルト値
+    //  board.phpで$page, $limitの値を指定されている場合は、その値が使われる
     public function getPosts($page = 1, $limit = 10)
     {
         return $this->db->fetchPostsByPage($page, $limit);

@@ -102,6 +102,7 @@ PHP BULLETIN BOARD/
 - データベース操作：例外処理の追加
 - generateTokenメソッドがBoardクラスとDeleteConfirmクラスにある。共有化できるなら共有化したい
 - Board.phpのsearchPostsメソッドの$page = 1, $limit = 10 の値の代入はいらない？
+    →デフォルト値として必要。board.phpで$pageと$limitが使われている場合にはそちらが優先される
 - countSearchResults（検索結果の総投稿数を取得するメソッド）、getTotalPostCount（検索されていない。通常の投稿数を取得するメソッド）同じ投稿数を取得するメソッドなのに、命名に統一感がないから修正したい
 - 検索結果の全て表示ボタンを削除したい
 - Board.phpとUpateEdit.phpとDeleteConfirm.phpのgenerateTokenメソッドを共有化したい。するならセッションマネージャ
@@ -117,6 +118,7 @@ PHP BULLETIN BOARD/
 - validateTokenメソッドがSessionManagerクラスとUpdateEditクラスの二つにある。共通化できるなら共通化したい
 
 
+
 ## 感想・反省点
 今回の掲示板アプリ作成での反省点は、ChatGPTを効果的に活用できなかったことです。ChatGPTの力だけでアプリを完成させることは絶対に避けたいと思っていました。そんなことをしたら、自分でコードを書く力や読む力、そして問題を解決する力が身につかないと考えていたからです。そのため、ChatGPTを利用する際には、単にコードをコピペするのではなく、そのコードの意味を理解することを心がけていました。
 掲示板アプリを作成している間は、提供されたコードの意味を理解しているつもりでしたが、アプリが完成した後に振り返ってみると、実際には理解が浅く、結果として自分の力ではなくChatGPTの力で作られたコードになってしまったと感じました。
@@ -126,8 +128,9 @@ PHP BULLETIN BOARD/
 
 
 ## 参考資料
-このアプリは、『ケケンタの独学ITブログの掲示板アプリの作り方』を参考に開発しました。以下のリンクを参考に、基本機能とセキュリティ対策の実装を行いました。
+このアプリは、PHPの基礎をProgateで学習した後に、『ケケンタの独学ITブログの掲示板アプリの作り方』を参考に開発しました。以下のリンクを参考に、基本機能とセキュリティ対策の実装を行いました。
 
+- [プロゲート]https://prog-8.com/dashboard
 - [PHP公式ドキュメント](https://www.php.net/manual/ja/index.php)
 - [ケケンタの独学ITブログ](https://kekenta-it-blog.com/board-app-php/)
 - [セキュリティ対策](https://kekenta-it-blog.com/php-board-app-secure/)

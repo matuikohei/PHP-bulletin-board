@@ -115,7 +115,7 @@ $total_pages = ceil($total_posts / $limit);
                     <?php foreach ($post_list as $post_item) : ?>
                         <li>
                             <!-- 投稿の各情報を表示 -->
-                            <span>ID：<?php echo htmlspecialchars($post_item['id'], ENT_QUOTES, 'UTF-8'); ?>　</span>
+                            <span>ID：<?php echo htmlspecialchars($post_item['id'], ENT_QUOTES, 'UTF-8'); ?></span>
                             <span><?php echo htmlspecialchars($post_item['title'], ENT_QUOTES, 'UTF-8'); ?></span>
                             <span>／投稿者：<?php echo htmlspecialchars($post_item['user_id'], ENT_QUOTES, 'UTF-8'); ?></span>
                             <p class="p-pre"><?php echo htmlspecialchars($post_item['comment'], ENT_QUOTES, 'UTF-8'); ?></p>

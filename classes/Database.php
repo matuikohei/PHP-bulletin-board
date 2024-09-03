@@ -75,6 +75,8 @@ class Database
     // 指定されたページ番号に基づいて、そのページに表示する投稿をデータベースから取得するメソッド
     public function fetchPostsByPage($page, $limit)
     {
+        // offsetは何件目から取得するかを指定するための変数
+        // limitは何件取得するか指定するための変数
         $offset = ($page - 1) * $limit;
         $stmt = $this->pdo->prepare('SELECT * FROM board_info ORDER BY id DESC LIMIT :limit OFFSET :offset');
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
