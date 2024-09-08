@@ -117,6 +117,12 @@ PHP BULLETIN BOARD/
 - startSession() メソッドがif ifになっているから修正したい
 - validateTokenメソッドがSessionManagerクラスとUpdateEditクラスの二つにある。共通化できるなら共通化したい
 
+### update-edit.php
+- データーベースから取得した画像を表示するためのhtml,css実実装
+
+### delete-confirm.php
+- データーベースから取得した画像を表示するためのhtml,css実実装
+
 
 
 ## 感想・反省点

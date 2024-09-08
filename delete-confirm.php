@@ -7,13 +7,15 @@ $token = $deleteConfirm->generateToken(); // CSRFトークンを生成
 ?>
 
 <!DOCTYPE html
-<html lang="ja">
+    <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>掲示板アプリ</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="container">
         <h1>削除確認</h1>
@@ -33,6 +35,15 @@ $token = $deleteConfirm->generateToken(); // CSRFトークンを生成
                         <p class="p-pre delete-confirm-input"><?php if (isset($_SESSION['comment'])) echo htmlspecialchars($_SESSION['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
                     </div>
                 </div>
+                <div>
+                    <p>画像</p>
+                    <!-- セッションから画像パスを取得して表示 -->
+                    <?php if (!empty($_SESSION['image_path'])) : ?>
+                        <img src="<?php echo htmlspecialchars($_SESSION['image_path'], ENT_QUOTES, 'UTF-8'); ?>" alt="投稿画像" style="max-width: 200px;">
+                    <?php else : ?>
+                        <p>画像はありません</p>
+                    <?php endif; ?>
+                </div>
                 <?php
                 //★【CSRF】 不正リクエストチェック用のトークン生成
                 echo '<input type="hidden" name="board_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '" />';
@@ -47,4 +58,5 @@ $token = $deleteConfirm->generateToken(); // CSRFトークンを生成
         </section>
     </div>
 </body>
+
 </html>

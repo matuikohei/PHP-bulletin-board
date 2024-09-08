@@ -47,6 +47,31 @@ $err_msg_comment = $updateEdit->getErrMsgComment();
                         </label>
                     </div>
                 </div>
+                <div class="post-form__flex">
+                    <div>
+                        <label>
+                            <p>現在の画像</p>
+                            <!-- 現在の画像を表示 -->
+                            <?php if (!empty($_SESSION['image_path'])) : ?>
+                                <img src="<?php echo htmlspecialchars($_SESSION['image_path'], ENT_QUOTES, 'UTF-8'); ?>" alt="現在の画像" style="max-width: 200px;">
+                            <?php else : ?>
+                                <p>画像はありません</p>
+                            <?php endif; ?>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <p>新しい画像のアップロード</p>
+                            <input type="file" name="post_image"> <!-- 画像アップロードの入力フィールドを追加 -->
+                            <!-- エラーメッセージ -->
+                            <?php if (!empty($err_msg_image)) {
+                                echo "<p class='err'>" . htmlspecialchars($err_msg_image, ENT_QUOTES, 'UTF-8') . "</p>";
+                            } ?>
+                        </label>
+                    </div>
+                </div>
+
+
                 <?php
                 //★ 不正リクエストチェック用のトークン生成
                 echo '<input type="hidden" name="board_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '" />';

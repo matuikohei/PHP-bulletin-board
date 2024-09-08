@@ -25,10 +25,10 @@ class UpdateEdit
         // board.phpで更新ボタンが押された時の処理
         if (isset($_POST['update_btn'])) {
             $this->getPostInfo();
-        // 更新ボタンが押された場合の処理
+            // 更新ボタンが押された場合の処理
         } elseif (isset($_POST['update_submit_btn'])) {
             $this->updatePost();
-        // キャンセルボタンが押された時の処理
+            // キャンセルボタンが押された時の処理
         } elseif (isset($_POST['cancel_btn'])) {
             $this->cancelUpdate();
         }
@@ -41,6 +41,7 @@ class UpdateEdit
             $_SESSION['id'] = $_POST['post_id'];
             try {
                 $pdo = $this->db->getPdo();
+                // 指定したidに一致する１行分のデータを取得（idだけでなくて、titleもcommentもimage_pathも取得できる）
                 $sql = 'SELECT id, title, comment, image_path FROM board_info WHERE id = :ID';
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindValue(':ID', $_SESSION['id'], PDO::PARAM_INT);
@@ -101,6 +102,13 @@ class UpdateEdit
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
             $uploadDir = 'uploads/';
             $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+
+            // 古い画像を削除する処理
+            if (!empty($_SESSION['image_path']) && file_exists($_SESSION['image_path'])) {
+                unlink($_SESSION['image_path']); // 古い画像を削除
+            }
+
+            // 新しい画像のアップロード
             if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
                 $_SESSION['image_path'] = $uploadFile;
             } else {
@@ -108,6 +116,20 @@ class UpdateEdit
             }
         }
     }
+
+    // 画像をアップロードするメソッド html cssで画像を表示する機能実実装
+    // private function handleImageUpload()
+    // {
+    //     if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] == UPLOAD_ERR_OK) {
+    //         $uploadDir = 'uploads/';
+    //         $uploadFile = $uploadDir . basename($_FILES['post_image']['name']);
+    //         if (move_uploaded_file($_FILES['post_image']['tmp_name'], $uploadFile)) {
+    //             $_SESSION['image_path'] = $uploadFile;
+    //         } else {
+    //             $this->err_msg_image = '画像のアップロードに失敗しました';
+    //         }
+    //     }
+    // }
 
     // 入力が有効か確認するメソッド
     private function isValid()
@@ -120,13 +142,23 @@ class UpdateEdit
     {
         try {
             $pdo = $this->db->getPdo();
-            $sql = 'UPDATE board_info SET title = :TITLE, comment = :COMMENT, image_path = :IMAGE_PATH WHERE id = :ID';
-            $stmt = $pdo->prepare($sql);
+
+            // 画像のパスが設定されている場合は画像パスも更新
+            if (!empty($_SESSION['image_path'])) {
+                $sql = 'UPDATE board_info SET title = :TITLE, comment = :COMMENT, image_path = :IMAGE_PATH WHERE id = :ID';
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':IMAGE_PATH', $_SESSION['image_path'], PDO::PARAM_STR);
+            } else {
+                // 画像のパスが設定されていない場合は画像パスを更新しない
+                $sql = 'UPDATE board_info SET title = :TITLE, comment = :COMMENT WHERE id = :ID';
+                $stmt = $pdo->prepare($sql);
+            }
+
             $stmt->bindValue(':ID', $_SESSION['id'], PDO::PARAM_INT);
             $stmt->bindValue(':TITLE', $_SESSION['title'], PDO::PARAM_STR);
             $stmt->bindValue(':COMMENT', $_SESSION['comment'], PDO::PARAM_STR);
-            $stmt->bindValue(':IMAGE_PATH', $_SESSION['image_path'], PDO::PARAM_STR);
             $stmt->execute();
+
             unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
             header('Location: board.php');
             exit();
@@ -135,6 +167,26 @@ class UpdateEdit
             exit();
         }
     }
+
+    // private function executeUpdate()
+    // {
+    //     try {
+    //         $pdo = $this->db->getPdo();
+    //         $sql = 'UPDATE board_info SET title = :TITLE, comment = :COMMENT, image_path = :IMAGE_PATH WHERE id = :ID';
+    //         $stmt = $pdo->prepare($sql);
+    //         $stmt->bindValue(':ID', $_SESSION['id'], PDO::PARAM_INT);
+    //         $stmt->bindValue(':TITLE', $_SESSION['title'], PDO::PARAM_STR);
+    //         $stmt->bindValue(':COMMENT', $_SESSION['comment'], PDO::PARAM_STR);
+    //         $stmt->bindValue(':IMAGE_PATH', $_SESSION['image_path'], PDO::PARAM_STR);
+    //         $stmt->execute();
+    //         unset($_SESSION['title'], $_SESSION['comment'], $_SESSION['image_path']);
+    //         header('Location: board.php');
+    //         exit();
+    //     } catch (PDOException $e) {
+    //         echo '接続失敗' . $e->getMessage();
+    //         exit();
+    //     }
+    // }
 
     // 更新をキャンセルするメソッド
     private function cancelUpdate()
